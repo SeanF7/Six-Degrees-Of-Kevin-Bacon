@@ -14,7 +14,7 @@ def natural_sort(l):
 
 def get_movie_cast_csv():
     folder_path = '../Data/movies/cast'
-    csvWrite = csv.writer(open("../Data/csv/cast.csv", "w",
+    csvWrite = csv.writer(open("../Data/csv/cast_movies.csv", "w",
                                newline='', encoding='utf-8'))
     csvWrite.writerow(["movie_id", "person_id", "character", "credit_id"])
     files = natural_sort(os.listdir(folder_path))
@@ -28,7 +28,7 @@ def get_movie_cast_csv():
 
 def get_movie_crew_csv():
     folder_path = '../Data/movies/cast'
-    csvWrite = csv.writer(open("../Data/csv/crew.csv", "w",
+    csvWrite = csv.writer(open("../Data/csv/crew_movies.csv", "w",
                                newline='', encoding='utf-8'))
     csvWrite.writerow(
         ["movie_id", "person_id", "department", "job", "credit_id"])
@@ -95,3 +95,6 @@ def get_people_csv():
 
 
 get_people_csv()
+get_movies_csv()
+get_movie_cast_csv()
+get_movie_crew_csv()
