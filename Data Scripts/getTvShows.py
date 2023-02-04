@@ -5,22 +5,25 @@ import json
 import csv
 import re
 import math
+import pandas as pd
 
 
 folder_path = '../Data/tv-shows'
 
 
 def natural_sort(l):
-    def convert(text): return int(text) if text.isdigit() else text.lower()
+    def convert(text):
+        return int(text) if text.isdigit() else text.lower()
 
-    def alphanum_key(key): return [convert(c)
-                                   for c in re.split('([0-9]+)', key)]
+    def alphanum_key(key):
+        return [convert(c) for c in re.split('([0-9]+)', key)]
+
     return sorted(l, key=alphanum_key)
 
 
 def parseCSV():
     files = natural_sort([f for f in os.listdir(
-        folder_path) if os.path.isfile(folder_path+'/'+f)])
+        folder_path) if os.path.isfile(os.path.join(folder_path, f))])
 
     csvWrite = csv.writer(open("../Data/csv/tv_seasons.csv", "w",
                                newline='', encoding='utf-8'))
@@ -58,11 +61,9 @@ async def main():
                         out.write(f"{json.dumps(jsonFile)}\n")
 
 csvReader = csv.DictReader(open("../Data/csv/tv_seasons.csv"))
-line_count = 0
-for x in csvReader:
-    for season_length in x["season_lengths"]:
-        print(season_length)
-        # for episode in x["season_lengths"][season-1]:
-        #     print(episode)
-    if int(x['tv_show_id']) == 2:
-        exit()
+pnd = pd.read_json(open("../Data/tv-shows/tv_1_100000.jsonl"), lines=True)
+print(pnd["seasons"][0][0]["episode_count"])
+for x in pnd["seasons"]:
+    for y in x:
+        print(y["episode_count"])
+    exit()
