@@ -1,53 +1,13 @@
 {
-  "adult": false,
-  "backdrop_path": "/vy90ivhOdFBd6ixBDnHZaSGCA77.jpg",
-  "created_by": [],
-  "episode_run_time": [],
-  "first_air_date": "",
-  "genres": [{ "id": 99, "name": "Documentary" }],
-  "homepage": "",
-  "id": 14521,
-  "in_production": false,
-  "languages": ["en"],
-  "last_air_date": null,
-  "last_episode_to_air": null,
-  "name": "Mysteries and Scandals",
-  "next_episode_to_air": null,
-  "networks": [
-    {
-      "id": 76,
-      "name": "E!",
-      "logo_path": "/ptpx2Ag52sYJG6LiX9zBlnKsQOS.png",
-      "origin_country": "US"
-    }
-  ],
-  "number_of_episodes": 1,
-  "number_of_seasons": 1,
-  "origin_country": ["US"],
-  "original_language": "en",
-  "original_name": "Mysteries and Scandals",
-  "overview": "Mysteries and Scandals is an American television program hosted by A.J. Benza. The series was originally broadcast on the E! network from March 1998 until February 2001.",
-  "popularity": 1.598,
-  "poster_path": "/xyTVBQvNf20p1HUHCKnJuigFxmQ.jpg",
-  "production_companies": [],
-  "production_countries": [],
-  "seasons": [
-    {
-      "air_date": null,
-      "episode_count": 1,
-      "id": 25965,
-      "name": "Season 1",
-      "overview": "",
-      "poster_path": null,
-      "season_number": 1
-    }
-  ],
-  "spoken_languages": [
-    { "english_name": "English", "iso_639_1": "en", "name": "English" }
-  ],
-  "status": "Ended",
-  "tagline": "",
-  "type": "Scripted",
-  "vote_average": 5.0,
-  "vote_count": 4
+  "job": "Director",
+  "department": "Directing",
+  "credit_id": "5fe48358d705940040ff5d0a",
+  "adult": "False",
+  "gender": 2,
+  "id": 97180,
+  "known_for_department": "Directing",
+  "name": "Steve Loter",
+  "original_name": "Steve Loter",
+  "popularity": 1.57,
+  "profile_path": "/5pwhyMiHLo4MNmIXxo7lM5KRaPo.jpg"
 }
