@@ -60,8 +60,8 @@ def get_movies_csv():
 
 
 def get_tv_shows_csv():
-    folder_path = '../Data/people'
-    csvWrite = csv.writer(open("../Data/csv/people.csv", "w",
+    folder_path = '../Data/tv-shows/shows'
+    csvWrite = csv.writer(open("../Data/csv/tv_episodes.csv", "w",
                                newline='', encoding='utf-8'))
     csvWrite.writerow(
         ["tv_show_id", "imdb_id", "adult", "title", "genres", "production_companies", "release_date", "budget", "revenue", "status", "spoken_languages", "runtime"])

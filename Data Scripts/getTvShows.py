@@ -2,11 +2,9 @@ import os
 import aiohttp
 import asyncio
 import json
-import csv
 import re
-import math
 import pandas as pd
-
+from tqdm import tqdm
 
 folder_path = '../Data/tv-shows'
 
@@ -21,49 +19,81 @@ def natural_sort(l):
     return sorted(l, key=alphanum_key)
 
 
-def parseCSV():
-    files = natural_sort([f for f in os.listdir(
-        folder_path) if os.path.isfile(os.path.join(folder_path, f))])
-
-    csvWrite = csv.writer(open("../Data/csv/tv_seasons.csv", "w",
-                               newline='', encoding='utf-8'))
-    for file in files:
-        csvWrite.writerow(["tv_show_id", "season_count", "season_lengths"])
-        for line in open(f"{folder_path}/{file}", "r").readlines():
-            jsonObj = json.loads(line)
-            csvWrite.writerow(
-                [jsonObj['id'], len(jsonObj['seasons']), [f["episode_count"] for f in jsonObj['seasons']]])
-
-
 apiKey = "b83cef215ad08de7d230139e640032b6"
 
 
 async def fetch(session, tv_id, season, episode):
-    async with session.get(f"https://api.themoviedb.org/3/tv/{tv_id}/season/{season}/episode/{episode}?api_key={apiKey}") as response:
-        return await response.json()
+    async with session.get(f"https://api.themoviedb.org/3/tv/{tv_id}/season/{season}/episode/{episode}/credits?api_key={apiKey}") as response:
+        returnVal = await response.json()
+        returnVal.update(
+            {"tv_id": tv_id, "season": season, "episode": episode})
+        return returnVal
 
 
-async def main():
-    chunks = 100000
-    request_amount = 219373
-    for x in range(1, math.ceil(request_amount/chunks)+1):
-        tasks = []
-        start = (x-1)*chunks+1
-        end = (x)*chunks if x != math.ceil(request_amount /
-                                           chunks) else (x-1)*chunks + request_amount % chunks
-        async with aiohttp.ClientSession() as session:
-            for y in range(start, end+1):
-                tasks.append(fetch(session, y))
-            jsons = await asyncio.gather(*tasks)
-            with open(f"Data/tv-shows/shows_{start}_{end}.jsonl", "w") as out:
+async def getShows():
+
+    files = natural_sort([f for f in os.listdir(
+        folder_path) if os.path.isfile(os.path.join(folder_path, f))])
+
+    pnd = pd.concat(
+        [pd.read_json(open(f"{folder_path}/{f}"), lines=True) for f in files])
+    tasks = []
+    file = open(f"../Data/tv-shows/shows/shows.jsonl", "a")
+    async with aiohttp.ClientSession() as session:
+        for index, row in tqdm(pnd.iterrows(), total=pnd.shape[0]):
+            tv_show_id = row['id']
+            for x in row['seasons']:
+                episode_count = x['episode_count']
+                season_number = x['season_number']
+                for x in range(1, episode_count+1):
+                    tasks.append(fetch(session, tv_show_id,
+                                       season_number, x))
+
+            if len(tasks) >= 100000:
+                print("Starting Gather")
+                jsons = await asyncio.gather(*tasks)
+                print("Ending Gather")
                 for jsonFile in jsons:
                     if "success" not in jsonFile:
-                        out.write(f"{json.dumps(jsonFile)}\n")
+                        file.write(f"{json.dumps(jsonFile)}\n")
+                tasks = []
 
-csvReader = csv.DictReader(open("../Data/csv/tv_seasons.csv"))
-pnd = pd.read_json(open("../Data/tv-shows/tv_1_100000.jsonl"), lines=True)
-print(pnd["seasons"][0][0]["episode_count"])
-for x in pnd["seasons"]:
-    for y in x:
-        print(y["episode_count"])
-    exit()
+        jsons = await asyncio.gather(*tasks)
+        for jsonFile in jsons:
+            if "success" not in jsonFile:
+                file.write(f"{json.dumps(jsonFile)}\n")
+
+
+async def getCastAndCrew():
+    files = natural_sort([f for f in os.listdir(
+        folder_path) if os.path.isfile(os.path.join(folder_path, f))])
+
+    pnd = pd.concat(
+        [pd.read_json(open(f"{folder_path}/{f}"), lines=True) for f in files])
+    tasks = []
+    file = open(f"../Data/tv-shows/credits/credits.jsonl", "a")
+    async with aiohttp.ClientSession() as session:
+        for index, row in tqdm(pnd.iterrows(), total=pnd.shape[0]):
+            tv_show_id = row['id']
+            for x in row['seasons']:
+                episode_count = x['episode_count']
+                season_number = x['season_number']
+                for x in range(1, episode_count+1):
+                    tasks.append(fetch(session, tv_show_id,
+                                       season_number, x))
+
+            if len(tasks) >= 100000:
+                jsons = await asyncio.gather(*tasks)
+                for jsonFile in jsons:
+                    if "success" not in jsonFile:
+                        file.write(f"{json.dumps(jsonFile)}\n")
+                tasks = []
+
+        jsons = await asyncio.gather(*tasks)
+        for jsonFile in jsons:
+            if "success" not in jsonFile:
+                file.write(f"{json.dumps(jsonFile)}\n")
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(getCastAndCrew())
