@@ -50,9 +50,7 @@ async def getShows():
                                        season_number, x))
 
             if len(tasks) >= 100000:
-                print("Starting Gather")
                 jsons = await asyncio.gather(*tasks)
-                print("Ending Gather")
                 for jsonFile in jsons:
                     if "success" not in jsonFile:
                         file.write(f"{json.dumps(jsonFile)}\n")

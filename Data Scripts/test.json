@@ -1,13 +1,26 @@
-{
-  "job": "Director",
-  "department": "Directing",
-  "credit_id": "5fe48358d705940040ff5d0a",
-  "adult": "False",
-  "gender": 2,
-  "id": 97180,
-  "known_for_department": "Directing",
-  "name": "Steve Loter",
-  "original_name": "Steve Loter",
-  "popularity": 1.57,
-  "profile_path": "/5pwhyMiHLo4MNmIXxo7lM5KRaPo.jpg"
-}
+{'cast': [{'adult': False, 'gender': 2, 'id': 12670, 'known_for_department': 'Acting', 'name': 'Takuya Kimura', 'original_name': 'Takuya Kimur
+a', 'popularity': 11.501, 'profile_path': '/rafirRSsSsZrSVV3znCUwwSGIGr.jpg', 'character': 'Satonaka Halu', 'credit_id': '52532e2319c295794000
+01b3', 'order': 0}, {'adult': False, 'gender': 1, 'id': 27779, 'known_for_department': 'Acting', 'name': 'Yûko Takeuchi', 'original_name': 'Yû
+ko Takeuchi', 'popularity': 2.99, 'profile_path': '/5P4bBAsvUjOUnlM8BuBCoBmlvMI.jpg', 'character': 'Murase Aki', 'credit_id': '52532e2819c2957
+940000b1f', 'order': 1}, {'adult': False, 'gender': 2, 'id': 1082639, 'known_for_department': 'Acting', 'name': 'Kenji Sakaguchi', 'original_n
+ame': 'Kenji Sakaguchi', 'popularity': 4.277, 'profile_path': '/amB02MCIrhhKIUSP9oClfYZGogV.jpg', 'character': 'Hotta Yamato', 'credit_id': '5
+bd76a9d925141039b048eb3', 'order': 2}, {'adult': False, 'gender': 2, 'id': 224746, 'known_for_department': 'Acting', 'name': 'Matsumoto Kōshir
+ō X', 'original_name': 'Matsumoto Kōshirō X', 'popularity': 2.062, 'profile_path': '/6MNWzdpSZE4LkBhzrU73E65RWcI.jpg', 'character': 'Ikegawa T
+omonori', 'credit_id': '5bd76ab092514103890468db', 'order': 3}, {'adult': False, 'gender': 2, 'id': 121797, 'known_for_department': 'Acting',
+'name': 'Ryuta Sato', 'original_name': 'Ryuta Sato', 'popularity': 3.213, 'profile_path': '/hSJoCgLBgh2qVHZh5BWihk8Gq89.jpg', 'character': 'Sh
+imamura Makoto', 'credit_id': '5bd76ac2c3a36820ec0560aa', 'order': 4}, {'adult': False, 'gender': 1, 'id': 145929, 'known_for_department': 'Ac
+ting', 'name': 'Noriko Nakagoshi', 'original_name': 'Noriko Nakagoshi', 'popularity': 1.831, 'profile_path': '/5WityXdqwxB1xteFzsJj5bCaEfj.jpg
+', 'character': 'Aizawa Yuri', 'credit_id': '5bd76acd0e0a264cdb003bb8', 'order': 5}, {'adult': False, 'gender': 1, 'id': 1211811, 'known_for_d
+epartment': 'Acting', 'name': 'Megumi', 'original_name': 'Megumi', 'popularity': 4.506, 'profile_path': '/9qqVBUuiszwHErmVx9wIXp6wPqk.jpg', 'c
+haracter': 'Ishikawa Chika', 'credit_id': '52532e2a19c2957940000b31', 'order': 6}, {'adult': False, 'gender': 1, 'id': 20330, 'known_for_depar
+tment': 'Acting', 'name': 'Yuriko Ishida', 'original_name': 'Yuriko Ishida', 'popularity': 8.505, 'profile_path': '/cADoBCi603Chz2IaxcwWT2mNwC
+f.jpg', 'character': 'Yoko', 'credit_id': '52532e2a19c2957940000b5b', 'order': 7}, {'adult': False, 'gender': 2, 'id': 58662, 'known_for_depar
+tment': 'Acting', 'name': 'Koichi Sato', 'original_name': 'Koichi Sato', 'popularity': 1.855, 'profile_path': '/zElHg4M5VF5RHQyZwUWN9NWEkih.jp
+g', 'character': 'Hyodo Yuichiro', 'credit_id': '52532e2619c295794000094d', 'order': 8}, {'adult': False, 'gender': 2, 'id': 226738, 'known_fo
+r_department': 'Acting', 'name': 'Kazuki Namioka', 'original_name': 'Kazuki Namioka', 'popularity': 5.312, 'profile_path': '/A3xhZlyPTRQ8MqtQN
+cTm1X8JqkT.jpg', 'character': 'Nishida Naritoshi', 'credit_id': '5bd76bd6c3a36820ec0562c3', 'order': 9}, {'adult': False, 'gender': 1, 'id': 1
+140297, 'known_for_department': 'Acting', 'name': 'Saori Takizawa', 'original_name': 'Saori Takizawa', 'popularity': 1.403, 'profile_path': '/
+e6RkbyOCH68h5HF1ddqB2V3y3oZ.jpg', 'character': 'Sonoda Saeko', 'credit_id': '5bd76bca0e0a264cdb003d59', 'order': 10}, {'adult': False, 'gender
+': 2, 'id': 3628227, 'known_for_department': 'Acting', 'name': 'Tetsu Kayama', 'original_name': 'Tetsu Kayama', 'popularity': 0.6, 'profile_pa
+th': '/mCgSWslZwvL5aRzKSTkFWehEVwS.jpg', 'character': 'Reishi Yamamoto', 'credit_id': '62d4e542048638005376def0', 'order': 11}], 'crew': [], '
+guest_stars': [], 'id': 1130462, 'tv_id': 1, 'season': 1, 'episode': 1}
