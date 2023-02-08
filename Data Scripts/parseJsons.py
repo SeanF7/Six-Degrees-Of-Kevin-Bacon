@@ -2,6 +2,7 @@ import json
 import csv
 import os
 import re
+import pandas as pd
 
 
 def natural_sort(l):
@@ -77,12 +78,12 @@ def get_tv_show_cast_csv():
     csvWrite = csv.writer(open("../Data/csv/tv_cast.csv", "w",
                                newline='', encoding='utf-8'))
     csvWrite.writerow(
-        ["episode_id", "person_id", "credit_id"])
+        ["episode_id", "person_id", "credit_id", "character"])
     for line in open("../Data/tv-shows/credits/credits.jsonl", "r").readlines():
         jsonObj = json.loads(line)
         for cast_member in jsonObj["cast"]:
             csvWrite.writerow(
-                [jsonObj["id"], cast_member["id"], cast_member["credit_id"]])
+                [jsonObj["id"], cast_member["id"], cast_member["credit_id"], cast_member["character"]])
 
 
 def get_tv_show_crew_csv():
@@ -114,3 +115,15 @@ def get_people_csv():
             csvWrite.writerow(
                 [jsonObj['id'], jsonObj['imdb_id'], jsonObj['adult'], jsonObj['popularity'],
                  jsonObj['name'], jsonObj['birthday'], jsonObj['deathday'], jsonObj['gender'], jsonObj['place_of_birth']])
+
+
+# with open('../Data/csv/Relationships/tv_cast.csv', newline='') as csvfile:
+#     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+#     for row in spamreader:
+#         print(row)
+#         exit()
+# file = open("../Data/tv-shows/credits/credits.jsonl", "r").readlines()
+# for x in file:
+#     print(x)
+#     exit()
+get_tv_show_cast_csv()

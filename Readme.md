@@ -46,7 +46,7 @@ CALL apoc.periodic.iterate(
 MATCH (m:Movie{movie_id: toInteger(cast.movie_id)})
 MATCH (p:Person{person_id: toInteger(cast.person_id)})
 CREATE (p)-[r:CASTED_FOR]->(m)
-SET r.credit_id = cast.credit_id',
+SET r.credit_id = cast.credit_id, r.character = cast.character',
 {batchSize:10000, parallel:True}) YIELD batches, total
 RETURN batches, total;
 
@@ -76,7 +76,7 @@ CALL apoc.periodic.iterate(
 MATCH (tv:TV_Show{episode_id: toInteger(cast.episode_id)})
 MATCH (p:Person{person_id: toInteger(cast.person_id)})
 CREATE (p)-[r:CASTED_FOR]->(tv)
-SET r.credit_id = cast.credit_id',
+SET r.credit_id = cast.credit_id, r.character = cast.character',
 {batchSize:10000, parallel:True}) YIELD batches, total
 RETURN batches, total
 ```
