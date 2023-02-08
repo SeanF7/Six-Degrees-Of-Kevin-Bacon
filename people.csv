@@ -1,4 +1,0 @@
-id,imdb_id,adult,popularity,name,birthday,deathday,gender,place_of_birth
-500,"nm0000129",false,48.407,"Tom Cruise",1962-07-03,null,2,"Syracuse, New York, USA"
-10127,"nm0000685",false,19.058,"Jon Voight",1938-12-29,null,2,"Yonkers, New York, USA"
-15319,"nm0001089",false,5.071,"Henry Czerny",1959-02-08,null,"Toronto, Ontario, Canada"

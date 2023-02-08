@@ -114,12 +114,3 @@ def get_people_csv():
             csvWrite.writerow(
                 [jsonObj['id'], jsonObj['imdb_id'], jsonObj['adult'], jsonObj['popularity'],
                  jsonObj['name'], jsonObj['birthday'], jsonObj['deathday'], jsonObj['gender'], jsonObj['place_of_birth']])
-
-
-row_count = sum(1 for row in csv.reader(
-    open('../Data/csv/crew_movies.csv', encoding="utf-8")))
-total = 0
-for file in os.listdir("../Data/csv"):
-    total += sum(1 for row in csv.reader(
-        open(f'../Data/csv/{file}', encoding="utf-8")))
-print(total)
