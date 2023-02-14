@@ -80,4 +80,3 @@ SET r.credit_id = cast.credit_id, r.character = cast.character',
 {batchSize:10000, parallel:True}) YIELD batches, total
 RETURN batches, total
 ```
-Test git 
