@@ -34,7 +34,7 @@ RETURN batches, total;
 // Load People
 CALL apoc.periodic.iterate(
 'LOAD CSV WITH HEADERS FROM "file:///people.csv" as person RETURN person','
-CREATE (p:Person{person_id: toInteger(person.person_id),imdb_id: person.imdb_id,adult:person.adult,popularity:person.popularity,name:person.name,birthday:person.birthday,deathyday:person.deathday,gender:person.gender,place_of_birth:person.place_of_birth})',
+CREATE (p:Person{person_id: toInteger(person.person_id),imdb_id: person.imdb_id,adult:person.adult,popularity:person.popularity,name:person.name,birthday:person.birthday,deathday:person.deathday,gender:person.gender,place_of_birth:person.place_of_birth})',
 {batchSize:10000, parallel:True}) YIELD batches, total
 RETURN batches, total;
 
