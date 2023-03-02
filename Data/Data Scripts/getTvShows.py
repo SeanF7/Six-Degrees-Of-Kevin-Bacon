@@ -5,8 +5,10 @@ import json
 import re
 import pandas as pd
 from tqdm import tqdm
-
+from dotenv import load_dotenv
 folder_path = '../Data/tv-shows'
+load_dotenv()
+apiKey = os.getenv('API_KEY')
 
 
 def natural_sort(l):
@@ -17,9 +19,6 @@ def natural_sort(l):
         return [convert(c) for c in re.split('([0-9]+)', key)]
 
     return sorted(l, key=alphanum_key)
-
-
-apiKey = "b83cef215ad08de7d230139e640032b6"
 
 
 async def fetch(session, tv_id, season, episode):
@@ -92,6 +91,6 @@ async def getCastAndCrew():
             if "success" not in jsonFile:
                 file.write(f"{json.dumps(jsonFile)}\n")
 
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(getCastAndCrew())
+# if __name__ == '__main__':
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(getCastAndCrew())

@@ -3,8 +3,11 @@ import asyncio
 import json as js
 import time
 import math
+from dotenv import load_dotenv
+load_dotenv()
+
+apiKey = os.getenv('API_KEY')
 start_time = time.time()
-apiKey = "b83cef215ad08de7d230139e640032b6"
 
 
 async def fetch(session, x):

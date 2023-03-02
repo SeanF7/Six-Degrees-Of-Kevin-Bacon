@@ -117,13 +117,4 @@ def get_people_csv():
                  jsonObj['name'], jsonObj['birthday'], jsonObj['deathday'], jsonObj['gender'], jsonObj['place_of_birth']])
 
 
-# with open('../Data/csv/Relationships/tv_cast.csv', newline='') as csvfile:
-#     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-#     for row in spamreader:
-#         print(row)
-#         exit()
-# file = open("../Data/tv-shows/credits/credits.jsonl", "r").readlines()
-# for x in file:
-#     print(x)
-#     exit()
 get_tv_show_cast_csv()
