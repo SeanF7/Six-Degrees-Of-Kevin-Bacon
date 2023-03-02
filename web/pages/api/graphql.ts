@@ -1,7 +1,7 @@
 import { gql, ApolloServer } from "apollo-server-micro";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 import neo4j from "neo4j-driver";
-
+// https://graphql.org/learn/queries/#using-variables-inside-fragments
 const typeDefs = gql`
   type Movie {
     title: String
