@@ -26,7 +26,7 @@ Don't forgot to create indexes and constraints
 CREATE TEXT INDEX person_index FOR (p:Person) ON (p.lowercase_name);
 CREATE CONSTRAINT person_id FOR (p:Person) REQUIRE p.person_id IS UNIQUE;
 CREATE CONSTRAINT movie_id FOR (m:Movie) REQUIRE m.movie_id IS UNIQUE;
-CREATE CONSTRAINT episode_id FOR (t:TVShow) REQUIRE t.episode_id IS UNIQUE;
+CREATE CONSTRAINT episode_id FOR (t:TvShow) REQUIRE t.episode_id IS UNIQUE;
 
 ```
 
