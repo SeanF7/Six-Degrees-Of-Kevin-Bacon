@@ -10,6 +10,8 @@ Issues in file is " can cause issues and some deathdates are inputted wrong.
 There is still issues with this command should find out how to remove --ignore-extra-columns=true --skip-duplicate-nodes --skip-bad-relationships
 ID is Type string but should probably be int. Causes passing of variables to be a bit weird but not a huge issue
 
+Adult is not working as it should be false and true but instead it is False and True. All that really matters is the true one though.
+
 ```
 neo4j-admin database import full --nodes=import/movies.csv --nodes=import/tv_episodes.csv --nodes=import/people.csv --relationships=import/crew_movies.csv --relationships=import/cast_movies.csv --relationships=import/tv_cast.csv --relationships=import/tv_crew.csv neo4j --overwrite-destination --ignore-extra-columns=true --skip-duplicate-nodes --skip-bad-relationships
 ```
