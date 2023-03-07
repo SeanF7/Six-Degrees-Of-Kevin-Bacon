@@ -10,7 +10,7 @@ const typeDefs = gql`
     revenue: Int
     genres: [String]
     imdb_id: String
-    movie_id: Int
+    movie_id: String
     production_companies: [Int]
     spoken_languages: [String]
     release_date: String
@@ -22,7 +22,7 @@ const typeDefs = gql`
 
   type TVShow {
     air_date: String
-    episode_id: Int
+    episode_id: String
     vote_average: Float
     name: String
     season: Int
@@ -40,7 +40,7 @@ const typeDefs = gql`
     deathday: Date
     gender: Int
     imdb_id: String
-    person_id: Int
+    person_id: String
     popularity: Float
     image_path: String
     casted_for_movie: [Movie!]!

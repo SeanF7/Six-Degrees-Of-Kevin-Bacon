@@ -1,4 +1,6 @@
 # WIP 
+## Requirements
+Node 16. Node 18 does not work and will have to look into why.
 ## Neo4j
 ### Commands
 Load Data Command 
