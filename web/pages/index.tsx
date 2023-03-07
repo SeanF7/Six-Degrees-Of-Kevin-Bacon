@@ -1,16 +1,21 @@
 import Head from "next/head";
 import { useState } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useLazyQuery, gql } from "@apollo/client";
+import ActorInput from "../components/ActorInput";
 
-const GET_MOVIE = gql`
-  query GetMovie($where: MovieWhere) {
-    movies(where: $where) {
-      title
-      crew {
+const GET_PATH = gql`
+  query Paths($first_person_id: String!, $second_person_id: String!) {
+    shortestPath(
+      first_person: $first_person_id
+      second_person: $second_person_id
+    ) {
+      ... on Person {
+        __typename
         name
       }
-      actors {
-        name
+      ... on Movie {
+        __typename
+        title
       }
     }
   }
@@ -30,44 +35,62 @@ export default function Home() {
   );
 }
 function Query() {
-  const [inputValue, setInputValue] = useState("");
-  const [id, setid] = useState(0);
-  const { loading, error, data } = useQuery(GET_MOVIE, {
-    variables: {
-      where: {
-        movie_id: id,
-      },
-    },
-  });
+  const [first_person, setFirst_Person] = useState("");
+  const [second_person, setSecond_Person] = useState("");
+  const [getPaths, { loading, error, data }] = useLazyQuery(GET_PATH);
 
-  const updateId = (e: any) => {
-    setid(Number(inputValue));
+  const updateForm = (e: any) => {
+    console.log(first_person, second_person);
+    getPaths({
+      variables: {
+        second_person_id: first_person,
+        first_person_id: second_person,
+      },
+    });
     e.preventDefault();
   };
   return (
     <div>
-      <form onSubmit={updateId}>
+      <ActorInput />
+      <form onSubmit={updateForm}>
         <input
           type="number"
           name="name"
-          value={inputValue}
+          value={second_person}
           onChange={(e) => {
-            setInputValue(e.target.value);
+            setSecond_Person(e.target.value);
           }}
         />
+        <input
+          type="number"
+          name="name"
+          value={first_person}
+          onChange={(e) => {
+            setFirst_Person(e.target.value);
+          }}
+        />
+        <button type="submit" onClick={updateForm}>
+          Submit
+        </button>
       </form>
       {loading ? (
         <p>Loading...</p>
       ) : (
         <div>
           {data &&
-            data.movies.map(({ title, crew, actors }: any) => (
-              <div key={title}>
-                <h1>{title}</h1> <h2>Cast:</h2>
-                <p>{actors.map((c: any) => c.name).join(", ")}</p>
-                <h2>Crew:</h2> <p>{crew.map((c: any) => c.name).join(", ")}</p>
-              </div>
-            ))}
+            data.shortestPath.map(({ __typename, name, title }: any) =>
+              __typename === "Person" ? (
+                <div key={name}>
+                  <h1 className="font-bold">{__typename}</h1>
+                  <p>{name}</p>
+                </div>
+              ) : (
+                <div key={title}>
+                  <h1 className="font-bold">{__typename}</h1>
+                  <p>{title}</p>
+                </div>
+              )
+            )}
         </div>
       )}
     </div>
