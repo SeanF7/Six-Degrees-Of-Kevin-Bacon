@@ -1,25 +1,6 @@
+import Header from "@/components/Header";
 import Head from "next/head";
-import { useState } from "react";
-import { useLazyQuery, gql } from "@apollo/client";
-import ActorInput from "../components/ActorInput";
-
-const GET_PATH = gql`
-  query Paths($first_person_id: String!, $second_person_id: String!) {
-    shortestPath(
-      first_person: $first_person_id
-      second_person: $second_person_id
-    ) {
-      ... on Person {
-        __typename
-        name
-      }
-      ... on Movie {
-        __typename
-        title
-      }
-    }
-  }
-`;
+import SearchPaths from "../components/SearchPaths";
 
 export default function Home() {
   return (
@@ -30,69 +11,8 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Query />
+      <Header />
+      <SearchPaths />
     </>
-  );
-}
-function Query() {
-  const [first_person, setFirst_Person] = useState("");
-  const [second_person, setSecond_Person] = useState("");
-  const [getPaths, { loading, error, data }] = useLazyQuery(GET_PATH);
-
-  const updateForm = (e: any) => {
-    console.log(first_person, second_person);
-    getPaths({
-      variables: {
-        second_person_id: first_person,
-        first_person_id: second_person,
-      },
-    });
-    e.preventDefault();
-  };
-  return (
-    <div>
-      <ActorInput />
-      <form onSubmit={updateForm}>
-        <input
-          type="number"
-          name="name"
-          value={second_person}
-          onChange={(e) => {
-            setSecond_Person(e.target.value);
-          }}
-        />
-        <input
-          type="number"
-          name="name"
-          value={first_person}
-          onChange={(e) => {
-            setFirst_Person(e.target.value);
-          }}
-        />
-        <button type="submit" onClick={updateForm}>
-          Submit
-        </button>
-      </form>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {data &&
-            data.shortestPath.map(({ __typename, name, title }: any) =>
-              __typename === "Person" ? (
-                <div key={name}>
-                  <h1 className="font-bold">{__typename}</h1>
-                  <p>{name}</p>
-                </div>
-              ) : (
-                <div key={title}>
-                  <h1 className="font-bold">{__typename}</h1>
-                  <p>{title}</p>
-                </div>
-              )
-            )}
-        </div>
-      )}
-    </div>
   );
 }

@@ -20,7 +20,7 @@ const typeDefs = gql`
     crew: [Person!]! @relationship(type: "CREW_FOR", direction: IN)
   }
 
-  type TVShow {
+  type TvShow {
     air_date: String
     episode_id: String
     vote_average: Float
@@ -45,13 +45,13 @@ const typeDefs = gql`
     image_path: String
     casted_for_movie: [Movie!]!
       @relationship(type: "CASTED_FOR", direction: OUT)
-    casted_for_tvshow: [TVShow!]!
+    casted_for_tvshow: [TvShow!]!
       @relationship(type: "CASTED_FOR", direction: OUT)
     crew_for_movie: [Movie!]! @relationship(type: "CREW_FOR", direction: OUT)
-    crew_for_tvshow: [TVShow!]! @relationship(type: "CREW_FOR", direction: OUT)
+    crew_for_tvshow: [TvShow!]! @relationship(type: "CREW_FOR", direction: OUT)
   }
 
-  union Path = Person | Movie | TVShow
+  union Path = Person | Movie | TvShow
 
   type Query {
     shortestPath(first_person: String!, second_person: String!): [Path]
