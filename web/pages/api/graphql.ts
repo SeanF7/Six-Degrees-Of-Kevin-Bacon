@@ -7,6 +7,7 @@ const typeDefs = gql`
     title: String
     adult: Boolean
     budget: Int
+    poster_path: String
     revenue: Int
     genres: [String]
     imdb_id: String
@@ -16,21 +17,36 @@ const typeDefs = gql`
     release_date: String
     status: String
     runtime: Int
-    actors: [Person!]! @relationship(type: "CASTED_FOR", direction: IN)
-    crew: [Person!]! @relationship(type: "CREW_FOR", direction: IN)
+    actors: [Person!]!
+      @relationship(type: "CAST_FOR", properties: "cast", direction: IN)
+    crew: [Person!]!
+      @relationship(type: "CREW_FOR", properties: "crew", direction: IN)
   }
 
-  type TvShow {
+  type TvEpisode {
     air_date: String
     episode_id: String
     vote_average: Float
-    name: String
+    show_id: Int
+    title: String
     season: Int
     runtime: Int
     episode: Int
     vote_count: Int
-    actors: [Person!]! @relationship(type: "CASTED_FOR", direction: IN)
-    crew: [Person!]! @relationship(type: "CREW_FOR", direction: IN)
+    actors: [Person!]!
+      @relationship(type: "CAST_FOR", properties: "cast", direction: IN)
+    crew: [Person!]!
+      @relationship(type: "CREW_FOR", properties: "crew", direction: IN)
+    parent_show: [TvShow!]!
+      @cypher(
+        statement: "MATCH (tvShow:TvShow{tv_id:toString(this.tv_show_id)}) RETURN tvShow"
+      )
+  }
+
+  type TvShow {
+    name: String
+    tv_id: Int
+    poster_path: String
   }
 
   type Person {
@@ -44,14 +60,26 @@ const typeDefs = gql`
     popularity: Float
     image_path: String
     casted_for_movie: [Movie!]!
-      @relationship(type: "CASTED_FOR", direction: OUT)
-    casted_for_tvshow: [TvShow!]!
-      @relationship(type: "CASTED_FOR", direction: OUT)
-    crew_for_movie: [Movie!]! @relationship(type: "CREW_FOR", direction: OUT)
-    crew_for_tvshow: [TvShow!]! @relationship(type: "CREW_FOR", direction: OUT)
+      @relationship(type: "CAST_FOR", properties: "cast", direction: OUT)
+    casted_for_tvshow: [TvEpisode!]!
+      @relationship(type: "CAST_FOR", properties: "cast", direction: OUT)
+    crew_for_movie: [Movie!]!
+      @relationship(type: "CREW_FOR", properties: "crew", direction: OUT)
+    crew_for_tvshow: [TvEpisode!]!
+      @relationship(type: "CREW_FOR", properties: "crew", direction: OUT)
   }
 
-  union Path = Person | Movie | TvShow
+  interface cast @relationshipProperties {
+    character: String
+    credit_id: String
+  }
+  interface crew @relationshipProperties {
+    department: String
+    job: String
+    credit_id: String
+  }
+
+  union Path = Person | Movie | TvEpisode
 
   type Query {
     shortestPath(first_person: String!, second_person: String!): [Path]
@@ -61,6 +89,18 @@ const typeDefs = gql`
         WITH NODES(p) AS nodes
         UNWIND nodes AS node
         RETURN node
+        """
+      )
+  }
+
+  type Query {
+    shortestPath2(first_person: String!, second_person: String!): [cast]
+      @cypher(
+        statement: """
+        MATCH (p1:Person {person_id: $first_person}), (p2:Person {person_id:$second_person}), p = shortestPath((p1)-[*]-(p2))
+        WITH p
+        WITH RELATIONSHIPS(p) as rels
+        RETURN rels
         """
       )
   }

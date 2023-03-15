@@ -1,5 +1,5 @@
 import { useQuery, gql } from "@apollo/client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 const GET_SUGGESTIONS = gql`
   query SuggestedNames($name: String!) {
@@ -65,7 +65,6 @@ function ActorInput({ setPersonID }: Props) {
 
   const handleArrows = (e: any) => {
     let element = document.activeElement as HTMLElement;
-    console.log(element.nextElementSibling?.childNodes);
     if (e.keyCode === 40) {
       (element.nextElementSibling as HTMLElement)?.focus();
     } else if (e.keyCode === 38) {
@@ -85,27 +84,30 @@ function ActorInput({ setPersonID }: Props) {
         // Deals with focus loss but causing issues with clicking on suggestions
         // onBlur={() => setSearch(false)}
       ></input>
-      {data &&
-        data.suggestedNames.map(
-          ({ name, image_path, person_id }: any, index: number) => (
-            <li
-              key={person_id}
-              onClick={() => clickUpdate(name, person_id)}
-              className="flex items-center border-stone-700 border-2 border-stone-700 rounded-lg w-96 h-16 bg-sky-700 text-3xl text-center"
-              tabIndex={index}
-            >
-              {image_path ? (
-                <img
-                  src={`https://image.tmdb.org/t/p/w45${image_path}`}
-                  className="overflow-hidden"
-                ></img>
-              ) : (
-                <img src="person.png"></img>
-              )}
-              <h1 className="font-bold">{name}</h1>
-            </li>
-          )
-        )}
+      {data && (
+        <ul className="-outline-offset-2 outline-4 outline-none outline-stone-700 grid grid-rows-5 absolute mt-16 bg-white">
+          {data.suggestedNames.map(
+            ({ name, image_path, person_id }: any, index: number) => (
+              <li
+                key={person_id}
+                onClick={() => clickUpdate(name, person_id)}
+                className="flex items-center w-96 h-16 text-3xl text-center border-y-2 border-stone-700 hover:bg-stone-600 focus:bg-stone-600 outline-none p-2 py-10 "
+                role="option"
+                tabIndex={index}
+              >
+                {image_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w45${image_path}`}
+                  ></img>
+                ) : (
+                  <img src="person.png"></img>
+                )}
+                <h1 className="font-bold">{name}</h1>
+              </li>
+            )
+          )}
+        </ul>
+      )}
     </div>
   );
 }
