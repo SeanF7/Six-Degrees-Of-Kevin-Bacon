@@ -1,5 +1,6 @@
 import React from "react";
-
+import Image from "next/image";
+import Link from "next/link";
 function Header() {
   return (
     <div className="flex justify-center bg-sky-700">
@@ -8,19 +9,24 @@ function Header() {
           Six Degrees Of <br />
           Kevin Bacon
         </h1>
-        <img src="HeaderImage.png" width="200"></img>
+        <Image
+          src="HeaderImage.png"
+          width={200}
+          height={200}
+          alt="Image of Kevin Bacon with arrows pointing to him"
+        ></Image>
       </div>
       <div className="absolute top-2 right-5 flex gap-5">
-        <a href="/about" className="text-3xl hover:text-red-600">
+        <Link href="/about" className="text-3xl hover:text-red-600">
           About
-        </a>
+        </Link>
         <div className="border-r-2 border-white h-10"></div>
-        <a
+        <Link
           href="https://github.com/SeanF7/Six-Degrees-Of-Kevin-Bacon-Capstone"
           className="text-3xl hover:text-red-600"
         >
           Github
-        </a>
+        </Link>
       </div>
     </div>
   );

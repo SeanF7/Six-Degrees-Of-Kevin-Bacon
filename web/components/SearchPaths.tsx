@@ -2,6 +2,7 @@ import React from "react";
 import ActorInput from "../components/ActorInput";
 import { useState } from "react";
 import { useLazyQuery, gql } from "@apollo/client";
+import Image from "next/image";
 const GET_PATH = gql`
   query Paths($first_person_id: String!, $second_person_id: String!) {
     shortestPath(
@@ -92,11 +93,19 @@ function SearchPaths() {
                       <div key={title} className="flex">
                         <p>{title}</p>
                         {image_path ? (
-                          <img
+                          <Image
                             src={`https://image.tmdb.org/t/p/w92/${parent_show.poster_path}`}
-                          ></img>
+                            alt={`Poster of ${parent_show.name}`}
+                            width={92}
+                            height={130}
+                          ></Image>
                         ) : (
-                          <img src="QuestionMark.png"></img>
+                          <Image
+                            src="/QuestionMark.png"
+                            alt="No TV poster found"
+                            width={92}
+                            height={130}
+                          ></Image>
                         )}
                       </div>
                     );
@@ -105,11 +114,19 @@ function SearchPaths() {
                       <div key={name} className="flex">
                         <p>{name}</p>
                         {image_path ? (
-                          <img
+                          <Image
                             src={`https://image.tmdb.org/t/p/w45${image_path}`}
-                          ></img>
+                            alt={`Image of  ${name}`}
+                            width={45}
+                            height={68}
+                          ></Image>
                         ) : (
-                          <img src="person.png"></img>
+                          <Image
+                            src="/person.png"
+                            alt="No person image found"
+                            width={45}
+                            height={68}
+                          ></Image>
                         )}
                       </div>
                     );
@@ -118,11 +135,19 @@ function SearchPaths() {
                       <div key={title} className="flex">
                         <p>{title}</p>
                         {poster_path ? (
-                          <img
+                          <Image
                             src={`https://image.tmdb.org/t/p/w92/${poster_path}`}
-                          ></img>
+                            alt={`Poster of ${title}`}
+                            width={92}
+                            height={130}
+                          ></Image>
                         ) : (
-                          <img src="QuestionMark.png"></img>
+                          <Image
+                            src="/QuestionMark.png"
+                            alt="No movie poster found"
+                            width={92}
+                            height={130}
+                          ></Image>
                         )}
                       </div>
                     );

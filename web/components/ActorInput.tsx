@@ -1,6 +1,7 @@
 import { useQuery, gql } from "@apollo/client";
 import { useState, useEffect } from "react";
 import React from "react";
+import Image from "next/image";
 const GET_SUGGESTIONS = gql`
   query SuggestedNames($name: String!) {
     suggestedNames(name: $name) {
@@ -92,15 +93,22 @@ function ActorInput({ setPersonID }: Props) {
                 key={person_id}
                 onClick={() => clickUpdate(name, person_id)}
                 className="flex items-center w-96 h-16 text-3xl text-center border-y-2 border-stone-700 hover:bg-stone-600 focus:bg-stone-600 outline-none p-2 py-10 "
-                role="option"
                 tabIndex={index}
               >
                 {image_path ? (
-                  <img
+                  <Image
                     src={`https://image.tmdb.org/t/p/w45${image_path}`}
-                  ></img>
+                    alt={`Image of  ${name}`}
+                    width={45}
+                    height={68}
+                  ></Image>
                 ) : (
-                  <img src="person.png"></img>
+                  <Image
+                    src="/person.png"
+                    alt="No person image found"
+                    width={45}
+                    height={68}
+                  ></Image>
                 )}
                 <h1 className="font-bold">{name}</h1>
               </li>
