@@ -2,6 +2,11 @@ import { gql, ApolloServer } from "apollo-server-micro";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 import neo4j from "neo4j-driver";
 
+interface PathArgs {
+  first_person_id: String;
+  second_person_id: String;
+}
+
 const typeDefs = gql`
   type Movie {
     title: String
@@ -69,6 +74,12 @@ const typeDefs = gql`
       @relationship(type: "CREW_FOR", properties: "crew", direction: OUT)
   }
 
+  type PersonWithRelationships {
+    person: Person
+    relationship: Relationship
+    endPoint: MovieOrTvEpisode
+  }
+
   interface cast @relationshipProperties {
     character: String
     credit_id: String
@@ -79,30 +90,26 @@ const typeDefs = gql`
     credit_id: String
   }
 
-  union Path = Person | Movie | TvEpisode
-
-  type Query {
-    shortestPath(first_person: String!, second_person: String!): [Path]
-      @cypher(
-        statement: """
-        MATCH (p1:Person {person_id: $first_person}), (p2:Person {person_id: $second_person}), p = shortestPath((p1)-[*]-(p2))
-        WITH NODES(p) AS nodes
-        UNWIND nodes AS node
-        RETURN node
-        """
-      )
+  type castObj implements cast {
+    character: String
+    credit_id: String
   }
 
+  type crewObj implements crew {
+    department: String
+    credit_id: String
+    job: String
+  }
+
+  union Relationship = castObj | crewObj
+  union MovieOrTvEpisode = Movie | TvEpisode
+  union Path = Person | Movie | TvEpisode | castObj | crewObj
+
   type Query {
-    shortestPath2(first_person: String!, second_person: String!): [cast]
-      @cypher(
-        statement: """
-        MATCH (p1:Person {person_id: $first_person}), (p2:Person {person_id:$second_person}), p = shortestPath((p1)-[*]-(p2))
-        WITH p
-        WITH RELATIONSHIPS(p) as rels
-        RETURN rels
-        """
-      )
+    find_path(
+      first_person_id: String!
+      second_person_id: String!
+    ): [PersonWithRelationships]
   }
 
   type Query {
@@ -124,6 +131,70 @@ const driver = neo4j.driver(
   neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
 );
 
+const resolvers = {
+  Query: {
+    find_path(_parent: any, _args: PathArgs, _context: any, _resolveInfo: any) {
+      return driver
+        .executeQuery(
+          `MATCH (p1:Person{person_id:"${_args.first_person_id}"}), (p2:Person {person_id:"${_args.second_person_id}"}), p = shortestPath((p1)-[*]-(p2)) RETURN p`
+        )
+        .then((res) => {
+          let results = [];
+          for (let i = 0; i < res.records[0].get(0).segments.length; i++) {
+            if (i % 2 === 0) {
+              results.push({
+                person: res.records[0].get(0).segments[i].start.properties,
+                relationship:
+                  res.records[0].get(0).segments[i].relationship.properties,
+                endPoint: res.records[0].get(0).segments[i].end.properties,
+              });
+            } else {
+              results.push({
+                person: res.records[0].get(0).segments[i].end.properties,
+                relationship:
+                  res.records[0].get(0).segments[i].relationship.properties,
+                endPoint: res.records[0].get(0).segments[i].start.properties,
+              });
+            }
+          }
+          return results;
+        });
+    },
+  },
+  Relationship: {
+    __resolveType(obj: any, context: any, info: any) {
+      if (obj.character) {
+        return "castObj";
+      }
+      if (obj.department) {
+        return "crewObj";
+      }
+      return null;
+    },
+  },
+  MovieOrTvEpisode: {
+    __resolveType(obj: any, context: any, info: any) {
+      if (obj.movie_id) {
+        return "Movie";
+      }
+      if (obj.tv_show_id) {
+        return "TvEpisode";
+      }
+      return null;
+    },
+  },
+  PersonWithRelationships: {
+    person(obj: any, context: any, info: any) {
+      return obj.person;
+    },
+    relationship(obj: any, context: any, info: any) {
+      return obj.relationship;
+    },
+    endPoint(obj: any, context: any, info: any) {
+      return obj.endPoint;
+    },
+  },
+};
 export default async function handler(req: any, res: any) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader(
@@ -139,7 +210,7 @@ export default async function handler(req: any, res: any) {
     return false;
   }
 
-  const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+  const neoSchema = new Neo4jGraphQL({ typeDefs, driver, resolvers });
   const apolloServer = new ApolloServer({
     schema: await neoSchema.getSchema(),
   });
