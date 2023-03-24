@@ -3,8 +3,11 @@ import { Neo4jGraphQL } from "@neo4j/graphql";
 import neo4j from "neo4j-driver";
 
 interface PathArgs {
-  first_person_id: String;
-  second_person_id: String;
+  first_person_id: Int;
+  second_person_id: Int;
+  movie_filter?: String;
+  tv_filter?: String;
+  person_filter?: String;
 }
 
 const typeDefs = gql`
@@ -16,10 +19,10 @@ const typeDefs = gql`
     revenue: Int
     genres: [String]
     imdb_id: String
-    movie_id: String
+    movie_id: Int
     production_companies: [Int]
     spoken_languages: [String]
-    release_date: String
+    release_date: Date
     status: String
     runtime: Int
     actors: [Person!]!
@@ -29,7 +32,7 @@ const typeDefs = gql`
   }
 
   type TvEpisode {
-    air_date: String
+    air_date: Date
     episode_id: String
     vote_average: Float
     show_id: Int
@@ -42,7 +45,7 @@ const typeDefs = gql`
       @relationship(type: "CAST_FOR", properties: "cast", direction: IN)
     crew: [Person!]!
       @relationship(type: "CREW_FOR", properties: "crew", direction: IN)
-    parent_show: [TvShow!]!
+    parent_show: TvShow
       @cypher(
         statement: "MATCH (tvShow:TvShow{tv_id:toString(this.tv_show_id)}) RETURN tvShow"
       )
@@ -61,7 +64,7 @@ const typeDefs = gql`
     deathday: Date
     gender: Int
     imdb_id: String
-    person_id: String
+    person_id: Int
     popularity: Float
     image_path: String
     casted_for_movie: [Movie!]!
@@ -77,14 +80,14 @@ const typeDefs = gql`
   type PersonWithRelationships {
     person: Person
     relationship: Relationship
-    endPoint: MovieOrTvEpisode
+    project: MovieOrTvEpisode
   }
 
-  interface cast @relationshipProperties {
+  interface cast {
     character: String
     credit_id: String
   }
-  interface crew @relationshipProperties {
+  interface crew {
     department: String
     job: String
     credit_id: String
@@ -103,13 +106,94 @@ const typeDefs = gql`
 
   union Relationship = castObj | crewObj
   union MovieOrTvEpisode = Movie | TvEpisode
-  union Path = Person | Movie | TvEpisode | castObj | crewObj
 
   type Query {
     find_path(
-      first_person_id: String!
-      second_person_id: String!
+      first_person_id: Int!
+      second_person_id: Int!
+      filters: PathFilters
     ): [PersonWithRelationships]
+  }
+
+  input PathFilters {
+    movie_filter: MovieWhere
+    tv_filter: TvFilter
+    person_filter: PersonFilter
+  }
+
+  input MovieFilter {
+    adult: Boolean
+    budget: Int
+    budget_GT: Int
+    budget_LT: Int
+    budget_GTE: Int
+    budget_LTE: Int
+    budget_IN: [Int]
+    revenue: Int
+    revenue_GT: Int
+    revenue_LT: Int
+    revenue_GTE: Int
+    revenue_LTE: Int
+    revenue_IN: [Int]
+    genres: [String]
+    imdb_id: String
+    movie_id: String
+    production_companies: [Int]
+    spoken_languages: [String]
+    release_date: Date
+    release_date_GT: Date
+    release_date_LT: Date
+    release_date_GTE: Date
+    release_date_LTE: Date
+    release_date_IN: [Date]
+    status: String
+    runtime: Int
+  }
+
+  input TvFilter {
+    air_date: Date
+    air_date_GT: Date
+    air_date_LT: Date
+    air_date_GTE: Date
+    air_date_LTE: Date
+    air_date_IN: [Date]
+    episode_id: String
+    vote_average: Float
+    vote_average_GT: Float
+    vote_average_LT: Float
+    vote_average_GTE: Float
+    vote_average_LTE: Float
+    vote_average_IN: [Float]
+    runtime: Int
+    runtime_GT: Int
+    runtime_LT: Int
+    runtime_GTE: Int
+    runtime_LTE: Int
+    runtime_IN: [Int]
+  }
+
+  input PersonFilter {
+    adult: Boolean
+    birthday: Date
+    birthday_GT: Date
+    birthday_LT: Date
+    birthday_GTE: Date
+    birthday_LTE: Date
+    birthday_IN: [Date]
+    deathday: Date
+    deathday_GT: Date
+    deathday_LT: Date
+    deathday_GTE: Date
+    deathday_LTE: Date
+    deathday_IN: [Date]
+    gender: Int
+    person_id: String
+    popularity: Float
+    popularity_GT: Float
+    popularity_LT: Float
+    popularity_GTE: Float
+    popularity_LTE: Float
+    popularity_IN: [Float]
   }
 
   type Query {
@@ -134,31 +218,53 @@ const driver = neo4j.driver(
 const resolvers = {
   Query: {
     find_path(_parent: any, _args: PathArgs, _context: any, _resolveInfo: any) {
-      return driver
-        .executeQuery(
-          `MATCH (p1:Person{person_id:"${_args.first_person_id}"}), (p2:Person {person_id:"${_args.second_person_id}"}), p = shortestPath((p1)-[*]-(p2)) RETURN p`
-        )
-        .then((res) => {
-          let results = [];
-          for (let i = 0; i < res.records[0].get(0).segments.length; i++) {
-            if (i % 2 === 0) {
-              results.push({
-                person: res.records[0].get(0).segments[i].start.properties,
-                relationship:
-                  res.records[0].get(0).segments[i].relationship.properties,
-                endPoint: res.records[0].get(0).segments[i].end.properties,
-              });
-            } else {
-              results.push({
-                person: res.records[0].get(0).segments[i].end.properties,
-                relationship:
-                  res.records[0].get(0).segments[i].relationship.properties,
-                endPoint: res.records[0].get(0).segments[i].start.properties,
-              });
-            }
+      let query = `MATCH
+                  (p1:Person {person_id: ${_args.first_person_id}}),
+                  (p2:Person {person_id: ${_args.second_person_id}}),
+                  p = shortestPath((p1)-[*]-(p2))`;
+
+      if (_args.person_filter || _args.movie_filter || _args.tv_filter) {
+        query = query.concat(` WHERE `);
+      }
+      let filters = [];
+      if (_args.movie_filter) {
+        filters.push(
+          `all(r IN [x in nodes(p) where x:Movie] WHERE ${_args.movie_filter})`
+        );
+      }
+      if (_args.tv_filter) {
+        filters.push(
+          `all(r IN [x in nodes(p) where x:TvEpisode] WHERE ${_args.tv_filter})`
+        );
+      }
+      if (_args.person_filter) {
+        filters.push(
+          `all(r IN [x in nodes(p) where x:Person] WHERE ${_args.person_filter} OR r.person_id = ${_args.first_person_id} OR r.person_id = ${_args.second_person_id})`
+        );
+      }
+      query = query.concat(filters.join(" AND "));
+      query = query.concat(` RETURN p`);
+      return driver.executeQuery(query).then((res) => {
+        let results = [];
+        for (let i = 0; i < res.records[0].get(0).segments.length; i++) {
+          if (i % 2 === 0) {
+            results.push({
+              person: res.records[0].get(0).segments[i].start.properties,
+              relationship:
+                res.records[0].get(0).segments[i].relationship.properties,
+              project: res.records[0].get(0).segments[i].end.properties,
+            });
+          } else {
+            results.push({
+              person: res.records[0].get(0).segments[i].end.properties,
+              relationship:
+                res.records[0].get(0).segments[i].relationship.properties,
+              project: res.records[0].get(0).segments[i].start.properties,
+            });
           }
-          return results;
-        });
+        }
+        return results;
+      });
     },
   },
   Relationship: {
@@ -190,8 +296,8 @@ const resolvers = {
     relationship(obj: any, context: any, info: any) {
       return obj.relationship;
     },
-    endPoint(obj: any, context: any, info: any) {
-      return obj.endPoint;
+    project(obj: any, context: any, info: any) {
+      return obj.project;
     },
   },
 };
