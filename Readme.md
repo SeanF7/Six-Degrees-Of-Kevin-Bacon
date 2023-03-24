@@ -14,6 +14,8 @@ ID is Type string but should probably be int. Causes passing of variables to be 
 Adult is not working as it should be false and true but instead it is False and True. All that really matters is the true one though.
 Lots of cleanup in regards to the graphql typings on filtering for better completion is still needed.
 
+dbms.cypher.forbid_exhaustive_shortestpath = true in neo4j config
+
 ```
 neo4j-admin database import full --nodes=import/movies_header.csv,import/movies.csv --nodes=import/tv_episodes_header.csv,import/tv_episodes.csv --nodes=import/tv_shows_header.csv,import/tv_shows.csv --nodes=import/people_header.csv,import/people.csv --relationships=import/crew_movies_header.csv,import/crew_movies.csv --relationships=import/cast_movies_header.csv,import/cast_movies.csv --relationships=import/tv_cast_header.csv,import/tv_cast.csv --relationships=import/tv_crew_header.csv,import/tv_crew.csv --overwrite-destination --ignore-extra-columns=true --skip-duplicate-nodes --skip-bad-relationships --id-type=integer
 ```

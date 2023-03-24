@@ -1,14 +1,6 @@
 import { gql, ApolloServer } from "apollo-server-micro";
 import { Neo4jGraphQL } from "@neo4j/graphql";
-import neo4j from "neo4j-driver";
-
-interface PathArgs {
-  first_person_id: Int;
-  second_person_id: Int;
-  movie_filter?: String;
-  tv_filter?: String;
-  person_filter?: String;
-}
+import neo4j, { Date } from "neo4j-driver";
 
 const typeDefs = gql`
   type Movie {
@@ -85,26 +77,26 @@ const typeDefs = gql`
 
   interface cast {
     character: String
-    credit_id: String
+    credit_id: String!
   }
   interface crew {
     department: String
     job: String
-    credit_id: String
+    credit_id: String!
   }
 
   type castObj implements cast {
     character: String
-    credit_id: String
+    credit_id: String!
   }
 
   type crewObj implements crew {
     department: String
-    credit_id: String
+    credit_id: String!
     job: String
   }
 
-  union Relationship = castObj | crewObj
+  union Relationship = castObj | crewObj | Credit
   union MovieOrTvEpisode = Movie | TvEpisode
 
   type Query {
@@ -115,21 +107,23 @@ const typeDefs = gql`
     ): [PersonWithRelationships]
   }
 
+  type Credit {
+    credit_id: String!
+  }
+
   input PathFilters {
-    movie_filter: MovieWhere
+    movie_filter: MovieFilter
     tv_filter: TvFilter
     person_filter: PersonFilter
   }
 
   input MovieFilter {
     adult: Boolean
-    budget: Int
     budget_GT: Int
     budget_LT: Int
     budget_GTE: Int
     budget_LTE: Int
     budget_IN: [Int]
-    revenue: Int
     revenue_GT: Int
     revenue_LT: Int
     revenue_GTE: Int
@@ -137,10 +131,14 @@ const typeDefs = gql`
     revenue_IN: [Int]
     genres: [String]
     imdb_id: String
-    movie_id: String
+    movie_id: Int
+    movie_id_GT: Int
+    movie_id_LT: Int
+    movie_id_GTE: Int
+    movie_id_LTE: Int
+    movie_id_IN: [Int]
     production_companies: [Int]
     spoken_languages: [String]
-    release_date: Date
     release_date_GT: Date
     release_date_LT: Date
     release_date_GTE: Date
@@ -151,20 +149,17 @@ const typeDefs = gql`
   }
 
   input TvFilter {
-    air_date: Date
     air_date_GT: Date
     air_date_LT: Date
     air_date_GTE: Date
     air_date_LTE: Date
     air_date_IN: [Date]
-    episode_id: String
-    vote_average: Float
+    episode_id: Int
     vote_average_GT: Float
     vote_average_LT: Float
     vote_average_GTE: Float
     vote_average_LTE: Float
     vote_average_IN: [Float]
-    runtime: Int
     runtime_GT: Int
     runtime_LT: Int
     runtime_GTE: Int
@@ -174,21 +169,18 @@ const typeDefs = gql`
 
   input PersonFilter {
     adult: Boolean
-    birthday: Date
     birthday_GT: Date
     birthday_LT: Date
     birthday_GTE: Date
     birthday_LTE: Date
     birthday_IN: [Date]
-    deathday: Date
     deathday_GT: Date
     deathday_LT: Date
     deathday_GTE: Date
     deathday_LTE: Date
     deathday_IN: [Date]
     gender: Int
-    person_id: String
-    popularity: Float
+    person_id: Int
     popularity_GT: Float
     popularity_LT: Float
     popularity_GTE: Float
@@ -218,32 +210,7 @@ const driver = neo4j.driver(
 const resolvers = {
   Query: {
     find_path(_parent: any, _args: PathArgs, _context: any, _resolveInfo: any) {
-      let query = `MATCH
-                  (p1:Person {person_id: ${_args.first_person_id}}),
-                  (p2:Person {person_id: ${_args.second_person_id}}),
-                  p = shortestPath((p1)-[*]-(p2))`;
-
-      if (_args.person_filter || _args.movie_filter || _args.tv_filter) {
-        query = query.concat(` WHERE `);
-      }
-      let filters = [];
-      if (_args.movie_filter) {
-        filters.push(
-          `all(r IN [x in nodes(p) where x:Movie] WHERE ${_args.movie_filter})`
-        );
-      }
-      if (_args.tv_filter) {
-        filters.push(
-          `all(r IN [x in nodes(p) where x:TvEpisode] WHERE ${_args.tv_filter})`
-        );
-      }
-      if (_args.person_filter) {
-        filters.push(
-          `all(r IN [x in nodes(p) where x:Person] WHERE ${_args.person_filter} OR r.person_id = ${_args.first_person_id} OR r.person_id = ${_args.second_person_id})`
-        );
-      }
-      query = query.concat(filters.join(" AND "));
-      query = query.concat(` RETURN p`);
+      let query = build_query(_args);
       return driver.executeQuery(query).then((res) => {
         let results = [];
         for (let i = 0; i < res.records[0].get(0).segments.length; i++) {
@@ -275,7 +242,7 @@ const resolvers = {
       if (obj.department) {
         return "crewObj";
       }
-      return null;
+      return "Credit";
     },
   },
   MovieOrTvEpisode: {
@@ -324,6 +291,81 @@ export default async function handler(req: any, res: any) {
   await apolloServer.createHandler({
     path: "/api/graphql",
   })(req, res);
+}
+
+function build_query(_args: PathArgs) {
+  let query = `MATCH
+                  (p1:Person {person_id: ${_args.first_person_id}}),
+                  (p2:Person {person_id: ${_args.second_person_id}}),
+                  p = shortestPath((p1)-[*]-(p2))`;
+  let MovieFilter = _args.filters?.movie_filter
+    ? create_filter(_args.filters?.movie_filter)
+    : null;
+  let TvFilter = _args.filters?.tv_filter
+    ? create_filter(_args.filters?.tv_filter)
+    : null;
+  let PersonFilter = _args.filters?.person_filter
+    ? create_filter(_args.filters?.person_filter)
+    : null;
+  if (
+    _args.filters?.person_filter ||
+    _args.filters?.movie_filter ||
+    _args.filters?.tv_filter
+  ) {
+    query = query.concat(` WHERE `);
+  }
+  let filters = [];
+  if (MovieFilter) {
+    filters.push(
+      `all(r IN [x in nodes(p) where x:Movie] WHERE ${MovieFilter})`
+    );
+  }
+  if (TvFilter) {
+    filters.push(
+      `all(r IN [x in nodes(p) where x:TvEpisode] WHERE ${TvFilter})`
+    );
+  }
+  if (PersonFilter) {
+    filters.push(
+      `all(r IN [x in nodes(p) where x:Person] WHERE ${PersonFilter} OR r.person_id = ${_args.first_person_id} OR r.person_id = ${_args.second_person_id})`
+    );
+  }
+  query = query.concat(filters.join(" AND "));
+  query = query.concat(` RETURN p`);
+  return query;
+}
+
+function create_filter(filter: MovieFilter | TvFilter | PersonFilter) {
+  let filters = [];
+  for (const x in filter) {
+    let values = [];
+    if (filter[x] instanceof Date) {
+      values.push(`date("${filter[x]}")`);
+    } else {
+      values = filter[x];
+    }
+    switch (true) {
+      case x.endsWith("_GT"):
+        filters.push(`r.${x.split("_GT")[0]} > ${values}`);
+        break;
+      case x.endsWith("_LT"):
+        filters.push(`r.${x.split("_LT")[0]} < ${values}`);
+        break;
+      case x.endsWith("_GTE"):
+        filters.push(`r.${x.split("_GTE")[0]} >= ${values}`);
+        break;
+      case x.endsWith("_LTE"):
+        filters.push(`r.${x.split("_LTE")[0]} <= ${values}`);
+        break;
+      case x.endsWith("_IN"):
+        filters.push(`${values[0]} <= r.${x.split("_IN")[0]} <= ${values[1]}`);
+        break;
+      default:
+        filters.push(`r.${x} = ${values}`);
+        break;
+    }
+  }
+  return filters.join(" AND ");
 }
 
 export const config = {
