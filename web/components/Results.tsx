@@ -37,101 +37,52 @@ function Results({ data }: any) {
               "poster_path" in project
                 ? project.poster_path
                 : project.parent_show?.poster_path;
+            let reverse = index === 1 ? "flex-row-reverse" : "";
             return (
               <>
-                {index % 2 === 0 ? (
-                  <div className="flex">
-                    <div className="flex flex-col items-center justify-center">
-                      {person.image_path ? (
-                        <Image
-                          src={`https://image.tmdb.org/t/p/w185${person.image_path}`}
-                          alt={`Image of  ${person.name}`}
-                          width={100}
-                          height={75}
-                        ></Image>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-36 w-36"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                      <h3 className="w-52 text-center text-3xl">
-                        {person.name}
-                      </h3>
-                    </div>
-                    <div className="flex w-20 flex-col items-center justify-center">
-                      <p>{part}</p>
+                <div className={`flex ${reverse}`}>
+                  <div className="flex flex-col items-center justify-center">
+                    {person.image_path ? (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w185${person.image_path}`}
+                        alt={`Image of  ${person.name}`}
+                        width={100}
+                        height={75}
+                      ></Image>
+                    ) : (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
                         viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-24 w-24"
+                        fill="currentColor"
+                        className="h-36 w-36"
                       >
                         <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"
+                          fillRule="evenodd"
+                          d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                          clipRule="evenodd"
                         />
                       </svg>
-                    </div>
+                    )}
+                    <h3 className="w-52 text-center text-3xl">{person.name}</h3>
                   </div>
-                ) : (
-                  <div className="flex">
-                    <div className="flex w-20 flex-col items-center justify-center">
-                      <p>{part}</p>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-24 w-24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col items-center justify-center">
-                      {person.image_path ? (
-                        <Image
-                          src={`https://image.tmdb.org/t/p/w185${person.image_path}`}
-                          alt={`Image of  ${person.name}`}
-                          width={100}
-                          height={75}
-                        ></Image>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-36 w-36"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                      <h3 className="w-52 text-center text-3xl">
-                        {person.name}
-                      </h3>
-                    </div>
+                  <div className="flex w-20 flex-col items-center justify-center">
+                    <p>{part ? part : "Job not found"}</p>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-24 w-24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"
+                      />
+                    </svg>
                   </div>
-                )}
+                </div>
                 {index % 2 === 0 && (
                   <div className="flex flex-col items-center px-10">
                     {poster ? (
@@ -149,7 +100,7 @@ function Results({ data }: any) {
                         height={138}
                       ></Image>
                     )}
-                    <div className="h-12 w-32">
+                    <div className="min-h-[3rem]  w-32">
                       <p className="text-center">{project.title}</p>
                       {"parent_show" in project && (
                         <p className="text-center">
@@ -185,7 +136,13 @@ function Results({ data }: any) {
           {Array.from(Array(connection_count), (e, i) => {
             let color = i === index / 2 ? "bg-black" : "bg-slate-500";
             return (
-              <div key={i} className={`h-2 w-2 rounded-full ${color}`}></div>
+              <div
+                key={i}
+                className={`h-6 w-6 rounded-sm ${color} flex items-center justify-center text-center align-middle text-xs text-white`}
+                onClick={() => setIndex(2 * i)}
+              >
+                {i + 1}
+              </div>
             );
           })}
         </div>

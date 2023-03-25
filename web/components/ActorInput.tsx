@@ -85,7 +85,7 @@ function ActorInput({ setPersonID }: Props) {
         // Deals with focus loss but causing issues with clicking on suggestions
         // onBlur={() => setSearch(false)}
       ></input>
-      {data && (
+      {data?.suggestedNames.length > 0 && (
         <ul className="absolute mt-16 grid grid-rows-5 bg-white outline-none outline-4 -outline-offset-2 outline-stone-700">
           {data.suggestedNames.map(
             ({ name, image_path, person_id }: any, index: number) => (
