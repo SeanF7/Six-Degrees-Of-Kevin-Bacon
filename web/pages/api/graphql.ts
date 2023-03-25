@@ -25,9 +25,9 @@ const typeDefs = gql`
 
   type TvEpisode {
     air_date: Date
-    episode_id: String
+    episode_id: Int
     vote_average: Float
-    show_id: Int
+    tv_show_id: Int
     title: String
     season: Int
     runtime: Int
@@ -38,9 +38,7 @@ const typeDefs = gql`
     crew: [Person!]!
       @relationship(type: "CREW_FOR", properties: "crew", direction: IN)
     parent_show: TvShow
-      @cypher(
-        statement: "MATCH (tvShow:TvShow{tv_id:toString(this.tv_show_id)}) RETURN tvShow"
-      )
+      @cypher(statement: "MATCH (tvShow:TvShow{tv_id:155513}) RETURN tvShow")
   }
 
   type TvShow {
@@ -105,6 +103,10 @@ const typeDefs = gql`
       second_person_id: Int!
       filters: PathFilters
     ): [PersonWithRelationships]
+  }
+
+  type Query {
+    test: TvEpisode
   }
 
   type Credit {
@@ -215,23 +217,64 @@ const resolvers = {
         let results = [];
         for (let i = 0; i < res.records[0].get(0).segments.length; i++) {
           if (i % 2 === 0) {
+            let project = res.records[0].get(0).segments[i].end.properties;
+            if (project.hasOwnProperty("episode_id")) {
+              let parent_show = driver
+                .session()
+                .run(
+                  `MATCH (tvShow:TvShow{tv_id:${project.tv_show_id}}) RETURN tvShow`
+                )
+                .then((res) => {
+                  return res.records[0].get(0).properties;
+                });
+              project.parent_show = parent_show;
+            }
             results.push({
               person: res.records[0].get(0).segments[i].start.properties,
               relationship:
                 res.records[0].get(0).segments[i].relationship.properties,
-              project: res.records[0].get(0).segments[i].end.properties,
+              project: project,
             });
           } else {
+            let project = res.records[0].get(0).segments[i].start.properties;
+            if (project.hasOwnProperty("episode_id")) {
+              let parent_show = driver
+                .session()
+                .run(
+                  `MATCH (tvShow:TvShow{tv_id:${project.tv_show_id}}) RETURN tvShow`
+                )
+                .then((res) => {
+                  return res.records[0].get(0).properties;
+                });
+              project.parent_show = parent_show;
+            }
             results.push({
               person: res.records[0].get(0).segments[i].end.properties,
               relationship:
                 res.records[0].get(0).segments[i].relationship.properties,
-              project: res.records[0].get(0).segments[i].start.properties,
+              project: project,
             });
           }
         }
         return results;
       });
+    },
+    test(_parent: any, _args: any, _context: any, _resolveInfo: any) {
+      return driver
+        .session()
+        .run("MATCH (p:TvEpisode{episode_id: 3659603}) RETURN p LIMIT 1")
+        .then((res) => {
+          let properties = res.records[0].get(0).properties;
+          console.log(res.records[0].get(0).labels[0] == "TvEpisode");
+          let parent_show = driver
+            .session()
+            .run("MATCH (tvShow:TvShow{tv_id:155513}) RETURN tvShow")
+            .then((res) => {
+              return res.records[0].get(0).properties;
+            });
+          properties.parent_show = parent_show;
+          return properties;
+        });
     },
   },
   Relationship: {

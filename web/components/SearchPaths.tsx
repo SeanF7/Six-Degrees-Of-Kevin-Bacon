@@ -2,30 +2,36 @@ import React from "react";
 import ActorInput from "../components/ActorInput";
 import { useState } from "react";
 import { useLazyQuery, gql } from "@apollo/client";
-import Image from "next/image";
+import Results from "./Results";
 const GET_PATH = gql`
-  query Paths($first_person_id: String!, $second_person_id: String!) {
-    shortestPath(
-      first_person: $first_person_id
-      second_person: $second_person_id
+  query Query($first_person_id: Int!, $second_person_id: Int!) {
+    find_path(
+      first_person_id: $first_person_id
+      second_person_id: $second_person_id
     ) {
-      ... on Person {
-        __typename
+      person {
         name
         image_path
       }
-      ... on Movie {
-        __typename
-        title
-        poster_path
+      relationship {
+        ... on crewObj {
+          job
+        }
+        ... on castObj {
+          character
+        }
       }
-
-      ... on TvEpisode {
-        __typename
-        title
-        parent_show {
-          name
+      project {
+        ... on Movie {
+          title
           poster_path
+        }
+        ... on TvEpisode {
+          title
+          parent_show {
+            poster_path
+            name
+          }
         }
       }
     }
@@ -33,34 +39,33 @@ const GET_PATH = gql`
 `;
 
 function SearchPaths() {
-  const [first_person, setFirst_Person] = useState("");
-  const [second_person, setSecond_Person] = useState("");
+  const [first_person, setFirst_Person] = useState(0);
+  const [second_person, setSecond_Person] = useState(0);
   const [getPaths, { loading, error, data }] = useLazyQuery(GET_PATH);
 
   const handleForm = (e: React.FormEvent) => {
     getPaths({
       variables: {
-        second_person_id: first_person,
-        first_person_id: second_person,
+        first_person_id: first_person,
+        second_person_id: second_person,
       },
     });
     e.preventDefault();
   };
-
   return (
-    <div className="flex justify-center flex-col text-center bg-sky-700">
+    <div className="flex flex-col justify-center bg-sky-700 text-center">
       <h1 className="text-4xl">Find the shortest path from</h1>
-      <div className="flex p-10 flex-col items-center">
+      <div className="flex flex-col items-center p-10">
         <form onSubmit={handleForm} className="flex flex-col gap-6">
           <div className="flex gap-9">
             <ActorInput setPersonID={setFirst_Person} />
-            <p className="text-3xl self-center">to</p>
+            <p className="self-center text-3xl">to</p>
             <ActorInput setPersonID={setSecond_Person} />
           </div>
           <button
             type="submit"
             onClick={handleForm}
-            className="bg-red-500 rounded-md p-2 w-3/12 h-16 self-center text-white border-2 border-red-500 hover:bg-white hover:text-red-500 text-3xl"
+            className="h-16 w-3/12 self-center rounded-md border-2 border-red-500 bg-red-500 p-2 text-3xl text-white hover:bg-white hover:text-red-500"
           >
             Search
           </button>
@@ -77,83 +82,8 @@ function SearchPaths() {
             </div>
           </div>
         ) : (
-          <div>
-            {data &&
-              data.shortestPath.map(
-                ({
-                  __typename,
-                  name,
-                  title,
-                  image_path,
-                  poster_path,
-                  parent_show,
-                }: any) => {
-                  if (__typename === "TvEpisode") {
-                    return (
-                      <div key={title} className="flex">
-                        <p>{title}</p>
-                        {image_path ? (
-                          <Image
-                            src={`https://image.tmdb.org/t/p/w92/${parent_show.poster_path}`}
-                            alt={`Poster of ${parent_show.name}`}
-                            width={92}
-                            height={130}
-                          ></Image>
-                        ) : (
-                          <Image
-                            src="/QuestionMark.png"
-                            alt="No TV poster found"
-                            width={92}
-                            height={130}
-                          ></Image>
-                        )}
-                      </div>
-                    );
-                  } else if (__typename === "Person") {
-                    return (
-                      <div key={name} className="flex">
-                        <p>{name}</p>
-                        {image_path ? (
-                          <Image
-                            src={`https://image.tmdb.org/t/p/w45${image_path}`}
-                            alt={`Image of  ${name}`}
-                            width={45}
-                            height={68}
-                          ></Image>
-                        ) : (
-                          <Image
-                            src="/person.png"
-                            alt="No person image found"
-                            width={45}
-                            height={68}
-                          ></Image>
-                        )}
-                      </div>
-                    );
-                  } else if (__typename === "Movie") {
-                    return (
-                      <div key={title} className="flex">
-                        <p>{title}</p>
-                        {poster_path ? (
-                          <Image
-                            src={`https://image.tmdb.org/t/p/w92/${poster_path}`}
-                            alt={`Poster of ${title}`}
-                            width={92}
-                            height={130}
-                          ></Image>
-                        ) : (
-                          <Image
-                            src="/QuestionMark.png"
-                            alt="No movie poster found"
-                            width={92}
-                            height={130}
-                          ></Image>
-                        )}
-                      </div>
-                    );
-                  }
-                }
-              )}
+          <div className="justify-center align-middle">
+            {data ? <Results data={data} /> : <p>no data</p>}
           </div>
         )}
       </div>

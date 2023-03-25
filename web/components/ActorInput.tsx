@@ -45,7 +45,7 @@ function ActorInput({ setPersonID }: Props) {
       setPersonID(data.suggestedNames[0].person_id);
     }
   };
-  const clickUpdate = (name: string, id: string) => {
+  const clickUpdate = (name: string, id: number) => {
     setPerson(name);
     setPersonID(id);
     setSearch(false);
@@ -81,18 +81,18 @@ function ActorInput({ setPersonID }: Props) {
         placeholder={placeHolder}
         value={person}
         onChange={updateName}
-        className="w-96 h-16 rounded-lg border-2 border-stone-700 focus:outline-none focus:border-red-500 text-3xl text-center"
+        className="h-16 w-96 rounded-lg border-2 border-stone-700 text-center text-3xl focus:border-red-500 focus:outline-none"
         // Deals with focus loss but causing issues with clicking on suggestions
         // onBlur={() => setSearch(false)}
       ></input>
       {data && (
-        <ul className="-outline-offset-2 outline-4 outline-none outline-stone-700 grid grid-rows-5 absolute mt-16 bg-white">
+        <ul className="absolute mt-16 grid grid-rows-5 bg-white outline-none outline-4 -outline-offset-2 outline-stone-700">
           {data.suggestedNames.map(
             ({ name, image_path, person_id }: any, index: number) => (
               <li
                 key={person_id}
                 onClick={() => clickUpdate(name, person_id)}
-                className="flex items-center w-96 h-16 text-3xl text-center border-y-2 border-stone-700 hover:bg-stone-600 focus:bg-stone-600 outline-none p-2 py-10 "
+                className="flex h-16 w-96 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-3xl outline-none hover:bg-stone-600 focus:bg-stone-600 "
                 tabIndex={index}
               >
                 {image_path ? (
