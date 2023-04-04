@@ -38,7 +38,9 @@ const typeDefs = gql`
     crew: [Person!]!
       @relationship(type: "CREW_FOR", properties: "crew", direction: IN)
     parent_show: TvShow
-      @cypher(statement: "MATCH (tvShow:TvShow{tv_id:155513}) RETURN tvShow")
+      @cypher(
+        statement: "MATCH (tvShow:TvShow{tv_id:(this.tv_show_id)}) RETURN tvShow"
+      )
   }
 
   type TvShow {
@@ -103,6 +105,14 @@ const typeDefs = gql`
       second_person_id: Int!
       filters: PathFilters
     ): [PersonWithRelationships]
+  }
+  type Query {
+    find_paths(
+      first_person_id: Int!
+      second_person_id: Int!
+      filters: PathFilters
+      max_depth: Int
+    ): [[PersonWithRelationships]]
   }
 
   type Query {
@@ -213,49 +223,22 @@ const driver = neo4j.driver(
 const resolvers = {
   Query: {
     find_path(_parent: any, _args: PathArgs, _context: any, _resolveInfo: any) {
-      let query = build_query(_args);
+      let query = build_query(_args, false);
+      return driver.executeQuery(query).then((res) => {
+        return parse_results(res.records[0]);
+      });
+    },
+    find_paths(
+      _parent: any,
+      _args: PathArgs,
+      _context: any,
+      _resolveInfo: any
+    ) {
+      let query = build_query(_args, true);
       return driver.executeQuery(query).then((res) => {
         let results = [];
-        for (let i = 0; i < res.records[0].get(0).segments.length; i++) {
-          if (i % 2 === 0) {
-            let project = res.records[0].get(0).segments[i].end.properties;
-            if (project.hasOwnProperty("episode_id")) {
-              let parent_show = driver
-                .session()
-                .run(
-                  `MATCH (tvShow:TvShow{tv_id:${project.tv_show_id}}) RETURN tvShow`
-                )
-                .then((res) => {
-                  return res.records[0].get(0).properties;
-                });
-              project.parent_show = parent_show;
-            }
-            results.push({
-              person: res.records[0].get(0).segments[i].start.properties,
-              relationship:
-                res.records[0].get(0).segments[i].relationship.properties,
-              project: project,
-            });
-          } else {
-            let project = res.records[0].get(0).segments[i].start.properties;
-            if (project.hasOwnProperty("episode_id")) {
-              let parent_show = driver
-                .session()
-                .run(
-                  `MATCH (tvShow:TvShow{tv_id:${project.tv_show_id}}) RETURN tvShow`
-                )
-                .then((res) => {
-                  return res.records[0].get(0).properties;
-                });
-              project.parent_show = parent_show;
-            }
-            results.push({
-              person: res.records[0].get(0).segments[i].end.properties,
-              relationship:
-                res.records[0].get(0).segments[i].relationship.properties,
-              project: project,
-            });
-          }
+        for (let i = 0; i < res.records.length; i++) {
+          results.push(parse_results(res.records[i]));
         }
         return results;
       });
@@ -320,11 +303,60 @@ export default async function handler(req: any, res: any) {
   })(req, res);
 }
 
-function build_query(_args: PathArgs) {
-  let query = `MATCH
-                  (p1:Person {person_id: ${_args.first_person_id}}),
-                  (p2:Person {person_id: ${_args.second_person_id}}),
-                  p = shortestPath((p1)-[*]-(p2))`;
+function parse_results(record: any) {
+  let results = [];
+  for (let i = 0; i < record.get(0).segments.length; i++) {
+    if (i % 2 === 0) {
+      let project = record.get(0).segments[i].end.properties;
+      if (project.hasOwnProperty("episode_id")) {
+        let parent_show = driver
+          .session()
+          .run(
+            `MATCH (tvShow:TvShow{tv_id:${project.tv_show_id}}) RETURN tvShow`
+          )
+          .then((res) => {
+            return res.records[0].get(0).properties;
+          });
+        project.parent_show = parent_show;
+      }
+      results.push({
+        person: record.get(0).segments[i].start.properties,
+        relationship: record.get(0).segments[i].relationship.properties,
+        project: project,
+      });
+    } else {
+      let project = record.get(0).segments[i].start.properties;
+      if (project.hasOwnProperty("episode_id")) {
+        let parent_show = driver
+          .session()
+          .run(
+            `MATCH (tvShow:TvShow{tv_id:${project.tv_show_id}}) RETURN tvShow`
+          )
+          .then((res) => {
+            return res.records[0].get(0).properties;
+          });
+        project.parent_show = parent_show;
+      }
+      results.push({
+        person: record.get(0).segments[i].end.properties,
+        relationship: record.get(0).segments[i].relationship.properties,
+        project: project,
+      });
+    }
+  }
+  return results;
+}
+
+function build_query(_args: PathArgs, multiple: boolean) {
+  let query = `MATCH (p1:Person {person_id: ${_args.first_person_id}}), (p2:Person {person_id: ${_args.second_person_id}})`;
+  if (multiple) {
+    query = query.concat(
+      ` CALL apoc.algo.allSimplePaths(p1,p2,"CAST_FOR|CREW_FOR",${_args.max_depth}) YIELD path as p`
+    );
+  } else {
+    query = query.concat(`, p = shortestPath((p1)-[*]-(p2))`);
+  }
+
   let MovieFilter = _args.filters?.movie_filter
     ? create_filter(_args.filters?.movie_filter)
     : null;
