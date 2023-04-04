@@ -58,6 +58,6 @@ RETURN p
 Find all Paths with filter
 
 MATCH (p1:Person{person_id:"1136406"}), (p2:Person {person_id:"505710"})
-CALL apoc.algo.allSimplePaths(p1,p2,"CAST_FOR|CREW_FOR",3) YIELD path
-WHERE all(r IN [x in nodes(path) where x:Movie] WHERE NOT r.budget = 0)
-RETURN path
+CALL apoc.algo.allSimplePaths(p1,p2,"CAST_FOR|CREW_FOR",3) YIELD path as p
+WHERE all(r IN [x in nodes(p) where x:Movie] WHERE NOT r.budget = 0)
+RETURN p

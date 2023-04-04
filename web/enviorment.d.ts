@@ -165,6 +165,7 @@ declare global {
       tv_filter?: TvFilter;
       person_filter?: PersonFilter;
     };
+    max_depth?: Number;
   }
 }
 

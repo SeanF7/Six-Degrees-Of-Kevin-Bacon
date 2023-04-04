@@ -1,6 +1,6 @@
 import React from "react";
 import ActorInput from "../components/ActorInput";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLazyQuery, gql } from "@apollo/client";
 import Results from "./Results";
 import SearchSettings from "./SearchSettings";
@@ -45,14 +45,72 @@ const GET_PATH = gql`
   }
 `;
 
+const GET_PATHS = gql`
+  query Query(
+    $first_person_id: Int!
+    $second_person_id: Int!
+    $filters: PathFilters
+    $max_depth: Int
+  ) {
+    find_paths(
+      first_person_id: $first_person_id
+      second_person_id: $second_person_id
+      filters: $filters
+      max_depth: $max_depth
+    ) {
+      person {
+        name
+        image_path
+      }
+      relationship {
+        ... on crewObj {
+          job
+        }
+        ... on castObj {
+          character
+        }
+      }
+      project {
+        ... on Movie {
+          title
+          poster_path
+        }
+        ... on TvEpisode {
+          title
+          parent_show {
+            poster_path
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
 function SearchPaths() {
   const [first_person, setFirst_Person] = useState(0);
   const [second_person, setSecond_Person] = useState(0);
   const [filters, setFilters] = useState();
-  const [getPaths, { loading, error, data }] = useLazyQuery(GET_PATH);
+  const [getPath, { loading, error, data }] = useLazyQuery(GET_PATH);
+  const [getPaths, { loading: multipleLoading, data: multipleData }] =
+    useLazyQuery(GET_PATHS);
+
+  useEffect(() => {
+    if (data && data.find_path.length > 0) {
+      console.log(data);
+      getPaths({
+        variables: {
+          first_person_id: first_person,
+          second_person_id: second_person,
+          filters: filters,
+          max_depth: data.find_path.length,
+        },
+      });
+    }
+  }, [data]);
 
   const handleForm = (e: React.FormEvent) => {
-    getPaths({
+    getPath({
       variables: {
         first_person_id: first_person,
         second_person_id: second_person,
@@ -96,6 +154,27 @@ function SearchPaths() {
         ) : (
           <div className="justify-center align-middle">
             {data && <Results data={data} />}
+          </div>
+        )}
+        {multipleLoading ? (
+          <div className="flex items-center justify-center pt-20">
+            <div
+              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status"
+            >
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Loading...
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="justify-center align-middle">
+            {multipleData &&
+              multipleData.find_paths.map((path: any, index: number) => (
+                <div key={index}>
+                  <Results data={{ find_path: path }} />
+                </div>
+              ))}
           </div>
         )}
       </div>
