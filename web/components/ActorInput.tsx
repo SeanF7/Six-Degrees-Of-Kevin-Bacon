@@ -81,7 +81,7 @@ function ActorInput({ setPersonID }: Props) {
         placeholder={placeHolder}
         value={person}
         onChange={updateName}
-        className="h-16 w-56 rounded-lg border-2 border-stone-700 text-center text-xl focus:border-red-500 focus:outline-none md:w-96 md:text-3xl"
+        className="h-16 w-56 rounded-lg border-2 border-stone-700 text-center text-xl focus:border-red-500 focus:outline-none md:w-72 md:text-2xl lg:w-96 lg:text-3xl"
         // Deals with focus loss but causing issues with clicking on suggestions
         // onBlur={() => setSearch(false)}
       ></input>
@@ -92,7 +92,7 @@ function ActorInput({ setPersonID }: Props) {
               <li
                 key={person_id}
                 onClick={() => clickUpdate(name, person_id)}
-                className="flex h-16 w-56 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-xl outline-none hover:bg-stone-600 focus:bg-stone-600 md:w-96 md:text-3xl "
+                className="flex h-16 w-56 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-xl outline-none hover:bg-stone-600 focus:bg-stone-600 lg:w-96 lg:text-3xl "
                 tabIndex={index}
               >
                 {image_path ? (

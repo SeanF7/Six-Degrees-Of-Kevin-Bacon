@@ -40,8 +40,8 @@ function Results({ data }: any) {
             let reverse = index === 1 ? "flex-row-reverse" : "";
             return (
               <>
-                <div className={`flex ${reverse}`}>
-                  <div className="flex flex-col items-center justify-center">
+                <div className={`flex ${reverse} lg:gap-5`}>
+                  <div className="flex w-12 flex-col items-center justify-center md:w-32 lg:w-auto">
                     {person.image_path ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w185${person.image_path}`}
@@ -54,7 +54,7 @@ function Results({ data }: any) {
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="currentColor"
-                        className="h-36 w-36"
+                        className="h-16 w-12 md:h-24 md:w-24 lg:h-36 lg:w-36"
                       >
                         <path
                           fillRule="evenodd"
@@ -63,17 +63,21 @@ function Results({ data }: any) {
                         />
                       </svg>
                     )}
-                    <h3 className="w-52 text-center text-3xl">{person.name}</h3>
+                    <h3 className="text-center md:text-3xl lg:w-52">
+                      {person.name}
+                    </h3>
                   </div>
-                  <div className="flex w-20 flex-col items-center justify-center">
-                    <p>{part ? part : "Job not found"}</p>
+                  <div className="md:w-18 mx-3 flex w-12 flex-col items-center justify-center lg:w-20">
+                    <p className="text-xs lg:text-base">
+                      {part ? part : "Job not found"}
+                    </p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="h-24 w-24"
+                      className="md:h-18 md:w-18 h-12 w-12 lg:h-24 lg:w-24"
                     >
                       <path
                         strokeLinecap="round"
@@ -84,7 +88,7 @@ function Results({ data }: any) {
                   </div>
                 </div>
                 {index % 2 === 0 && (
-                  <div className="flex flex-col items-center px-10">
+                  <div className="flex w-24 flex-col items-center md:w-52 lg:w-max lg:px-10">
                     {poster ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w154${poster}`}
@@ -100,7 +104,7 @@ function Results({ data }: any) {
                         height={138}
                       ></Image>
                     )}
-                    <div className="min-h-[3rem]  w-32">
+                    <div className="min-h-[3rem]">
                       <p className="text-center">{project.title}</p>
                       {"parent_show" in project && (
                         <p className="text-center">
@@ -115,15 +119,18 @@ function Results({ data }: any) {
           }
         )}
       </div>
-      <div className="flex justify-center gap-5 pt-4">
-        <button onClick={go_left} className="h-12 w-12 rounded-md bg-slate-500">
+      <div className="flex justify-center gap-5 lg:pt-4">
+        <button
+          onClick={go_left}
+          className="h-6 w-6 rounded-md bg-slate-500 lg:h-12 lg:w-12"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="h-12 w-12"
+            className="h-6 w-6 lg:h-12 lg:w-12"
           >
             <path
               strokeLinecap="round"
@@ -148,7 +155,7 @@ function Results({ data }: any) {
         </div>
         <button
           onClick={go_right}
-          className="h-12 w-12 rounded-md bg-slate-500"
+          className="h-6 w-6 rounded-md bg-slate-500 lg:h-12 lg:w-12"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +163,7 @@ function Results({ data }: any) {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="h-12 w-12"
+            className="h-6 w-6 lg:h-12 lg:w-12"
           >
             <path
               strokeLinecap="round"

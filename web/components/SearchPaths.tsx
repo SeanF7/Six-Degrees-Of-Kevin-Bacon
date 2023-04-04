@@ -66,7 +66,7 @@ function SearchPaths() {
       <h1 className="text-2xl md:text-4xl">Find the shortest path from</h1>
       <div className="flex flex-col items-center p-10">
         <form onSubmit={handleForm} className="flex flex-col gap-6">
-          <div className="gap-9  md:flex">
+          <div className="gap-2 md:flex">
             <ActorInput setPersonID={setFirst_Person} />
             <p className="self-center text-3xl">to</p>
             <ActorInput setPersonID={setSecond_Person} />
