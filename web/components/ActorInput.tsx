@@ -81,7 +81,7 @@ function ActorInput({ setPersonID }: Props) {
         placeholder={placeHolder}
         value={person}
         onChange={updateName}
-        className="h-16 w-96 rounded-lg border-2 border-stone-700 text-center text-3xl focus:border-red-500 focus:outline-none"
+        className="h-16 w-56 rounded-lg border-2 border-stone-700 text-center text-xl focus:border-red-500 focus:outline-none md:w-96 md:text-3xl"
         // Deals with focus loss but causing issues with clicking on suggestions
         // onBlur={() => setSearch(false)}
       ></input>
@@ -92,25 +92,29 @@ function ActorInput({ setPersonID }: Props) {
               <li
                 key={person_id}
                 onClick={() => clickUpdate(name, person_id)}
-                className="flex h-16 w-96 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-3xl outline-none hover:bg-stone-600 focus:bg-stone-600 "
+                className="flex h-16 w-56 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-xl outline-none hover:bg-stone-600 focus:bg-stone-600 md:w-96 md:text-3xl "
                 tabIndex={index}
               >
                 {image_path ? (
                   <Image
                     src={`https://image.tmdb.org/t/p/w45${image_path}`}
                     alt={`Image of  ${name}`}
+                    className="h-16 w-11"
+                    sizes="(max-width: 45px) 45px, 45px"
                     width={45}
                     height={68}
                   ></Image>
                 ) : (
                   <Image
                     src="/person.png"
+                    sizes="(max-width: 45px) 45px, 45px"
+                    className="h-16 w-11"
                     alt="No person image found"
                     width={45}
                     height={68}
                   ></Image>
                 )}
-                <h1 className="font-bold">{name}</h1>
+                <h1 className="pl-2 font-bold">{name}</h1>
               </li>
             )
           )}

@@ -151,6 +151,7 @@ const typeDefs = gql`
   }
 
   input TvFilter {
+    adult: Boolean
     air_date_GT: Date
     air_date_LT: Date
     air_date_GTE: Date
@@ -259,23 +260,6 @@ const resolvers = {
         return results;
       });
     },
-    test(_parent: any, _args: any, _context: any, _resolveInfo: any) {
-      return driver
-        .session()
-        .run("MATCH (p:TvEpisode{episode_id: 3659603}) RETURN p LIMIT 1")
-        .then((res) => {
-          let properties = res.records[0].get(0).properties;
-          console.log(res.records[0].get(0).labels[0] == "TvEpisode");
-          let parent_show = driver
-            .session()
-            .run("MATCH (tvShow:TvShow{tv_id:155513}) RETURN tvShow")
-            .then((res) => {
-              return res.records[0].get(0).properties;
-            });
-          properties.parent_show = parent_show;
-          return properties;
-        });
-    },
   },
   Relationship: {
     __resolveType(obj: any, context: any, info: any) {
@@ -382,7 +366,15 @@ function create_filter(filter: MovieFilter | TvFilter | PersonFilter) {
   let filters = [];
   for (const x in filter) {
     let values = [];
-    if (filter[x] instanceof Date) {
+    if (filter[x] instanceof Array) {
+      for (const y in filter[x]) {
+        if (filter[x][y] instanceof Date) {
+          values.push(`date("${filter[x][y]}")`);
+        } else {
+          values.push(filter[x][y]);
+        }
+      }
+    } else if (filter[x] instanceof Date) {
       values.push(`date("${filter[x]}")`);
     } else {
       values = filter[x];
