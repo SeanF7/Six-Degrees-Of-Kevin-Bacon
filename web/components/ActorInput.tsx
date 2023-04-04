@@ -92,7 +92,7 @@ function ActorInput({ setPersonID }: Props) {
               <li
                 key={person_id}
                 onClick={() => clickUpdate(name, person_id)}
-                className="flex h-16 w-56 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-xl outline-none hover:bg-stone-600 focus:bg-stone-600 lg:w-96 lg:text-3xl "
+                className="flex h-16 w-56 items-center border-y-2 border-stone-700 p-2 py-10 text-center text-xl outline-none hover:bg-stone-600 focus:bg-stone-600 md:w-72 lg:w-96 lg:text-3xl "
                 tabIndex={index}
               >
                 {image_path ? (
@@ -100,14 +100,12 @@ function ActorInput({ setPersonID }: Props) {
                     src={`https://image.tmdb.org/t/p/w45${image_path}`}
                     alt={`Image of  ${name}`}
                     className="h-16 w-11"
-                    sizes="(max-width: 45px) 45px, 45px"
                     width={45}
                     height={68}
                   ></Image>
                 ) : (
                   <Image
                     src="/person.png"
-                    sizes="(max-width: 45px) 45px, 45px"
                     className="h-16 w-11"
                     alt="No person image found"
                     width={45}
