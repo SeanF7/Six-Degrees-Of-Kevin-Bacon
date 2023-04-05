@@ -2,8 +2,9 @@ import React from "react";
 import ActorInput from "../components/ActorInput";
 import { useState, useEffect } from "react";
 import { useLazyQuery, gql } from "@apollo/client";
-import Results from "./Results";
+import SingleResult from "./SingleResult";
 import SearchSettings from "./SearchSettings";
+import MultipleResults from "./MultipleResults";
 
 const GET_PATH = gql`
   query Query(
@@ -97,7 +98,6 @@ function SearchPaths() {
 
   useEffect(() => {
     if (data && data.find_path.length > 0) {
-      console.log(data);
       getPaths({
         variables: {
           first_person_id: first_person,
@@ -119,10 +119,11 @@ function SearchPaths() {
     });
     e.preventDefault();
   };
+
   return (
     <div className="flex flex-col justify-center bg-sky-700 text-center">
-      <h1 className="text-2xl md:text-4xl">Find the shortest path from</h1>
-      <div className="flex flex-col items-center p-10">
+      <h1 className="pb-5 text-2xl md:text-4xl">Find the shortest path from</h1>
+      <div className="flex flex-col items-center">
         <form onSubmit={handleForm} className="flex flex-col gap-6">
           <div className="gap-2 md:flex">
             <ActorInput setPersonID={setFirst_Person} />
@@ -152,9 +153,7 @@ function SearchPaths() {
             </div>
           </div>
         ) : (
-          <div className="justify-center align-middle">
-            {data && <Results data={data} />}
-          </div>
+          <>{data && <SingleResult data={data} />}</>
         )}
         {multipleLoading ? (
           <div className="flex items-center justify-center pt-20">
@@ -168,14 +167,11 @@ function SearchPaths() {
             </div>
           </div>
         ) : (
-          <div className="justify-center align-middle">
-            {multipleData &&
-              multipleData.find_paths.map((path: any, index: number) => (
-                <div key={index}>
-                  <Results data={{ find_path: path }} />
-                </div>
-              ))}
-          </div>
+          <>
+            {multipleData?.find_paths && (
+              <MultipleResults paths={multipleData.find_paths} />
+            )}
+          </>
         )}
       </div>
     </div>

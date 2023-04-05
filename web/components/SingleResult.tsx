@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-function Results({ data }: any) {
+function SingleResult({ data }: any) {
   const [index, setIndex] = useState(0);
   let first_person = data.find_path[index];
   let second_person = data.find_path[index + 1];
@@ -22,7 +22,7 @@ function Results({ data }: any) {
   };
 
   return (
-    <div className="mt-12 rounded-2xl border-8 border-slate-700 bg-slate-700">
+    <div className="mx-4 mt-12 flex flex-col justify-between overflow-hidden rounded-2xl border-8 border-slate-700 bg-slate-700">
       <div className="flex justify-items-center">
         {people.map(
           (
@@ -41,33 +41,27 @@ function Results({ data }: any) {
             return (
               <>
                 <div className={`flex ${reverse} lg:gap-5`}>
-                  <div className="flex w-12 flex-col items-center justify-center md:w-32 lg:w-auto">
+                  <div className="flex flex-col items-center justify-center">
                     {person.image_path ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w185${person.image_path}`}
                         alt={`Image of  ${person.name}`}
-                        width={100}
-                        height={75}
+                        width={128}
+                        height={192}
                       ></Image>
                     ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="h-16 w-12 md:h-24 md:w-24 lg:h-36 lg:w-36"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <Image
+                        src="/person.png"
+                        alt={`Image of  ${person.name}`}
+                        width={128}
+                        height={192}
+                      ></Image>
                     )}
-                    <h3 className="text-center md:text-3xl lg:w-52">
+                    <h3 className="line-clamp-1 lg:w-18 w-12 md:w-16">
                       {person.name}
                     </h3>
                   </div>
-                  <div className="md:w-18 mx-3 flex w-12 flex-col items-center justify-center lg:w-20">
+                  <div className="mx-3 flex w-12 flex-col items-center justify-center">
                     <p className="text-xs lg:text-base">
                       {part ? part : "Job not found"}
                     </p>
@@ -77,7 +71,6 @@ function Results({ data }: any) {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="md:h-18 md:w-18 h-12 w-12 lg:h-24 lg:w-24"
                     >
                       <path
                         strokeLinecap="round"
@@ -88,7 +81,7 @@ function Results({ data }: any) {
                   </div>
                 </div>
                 {index % 2 === 0 && (
-                  <div className="flex w-24 flex-col items-center md:w-52 lg:w-max lg:px-10">
+                  <div className="flex flex-col items-center md:w-52 lg:px-10">
                     {poster ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w154${poster}`}
@@ -104,14 +97,12 @@ function Results({ data }: any) {
                         height={138}
                       ></Image>
                     )}
-                    <div className="min-h-[3rem]">
-                      <p className="text-center">{project.title}</p>
-                      {"parent_show" in project && (
-                        <p className="text-center">
-                          {project.parent_show?.name}
-                        </p>
-                      )}
-                    </div>
+                    <p className="line-clamp-3 text-center">{project.title}</p>
+                    {"parent_show" in project && (
+                      <p className="line-clamp-2 text-center">
+                        {project.parent_show?.name}
+                      </p>
+                    )}
                   </div>
                 )}
               </>
@@ -177,4 +168,4 @@ function Results({ data }: any) {
   );
 }
 
-export default Results;
+export default SingleResult;

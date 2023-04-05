@@ -391,6 +391,9 @@ function build_query(_args: PathArgs, multiple: boolean) {
   }
   query = query.concat(filters.join(" AND "));
   query = query.concat(` RETURN p`);
+  if (multiple) {
+    query = query.concat(` LIMIT 10`);
+  }
   return query;
 }
 
