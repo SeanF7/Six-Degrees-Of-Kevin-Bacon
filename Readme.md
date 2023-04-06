@@ -61,3 +61,11 @@ MATCH (p1:Person{person_id:"1136406"}), (p2:Person {person_id:"505710"})
 CALL apoc.algo.allSimplePaths(p1,p2,"CAST_FOR|CREW_FOR",3) YIELD path as p
 WHERE all(r IN [x in nodes(p) where x:Movie] WHERE NOT r.budget = 0)
 RETURN p
+
+Finds all paths and returns sum of revenue
+
+MATCH (p1:Person{person_id:1136406}), (p2:Person {person_id:505710})
+CALL apoc.algo.allSimplePaths(p1,p2,"CAST_FOR|CREW_FOR",4) YIELD path as p
+RETURN p, apoc.coll.sum([movie in [x in nodes(p) where x:Movie] | movie.revenue]) as rev_sum
+ORDER BY rev_sum DESC
+LIMIT 10
