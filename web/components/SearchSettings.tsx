@@ -67,11 +67,16 @@ function SearchSettings({ setFilters }: Props) {
         });
       }
       if (Array.isArray(data)) {
-        if (data[0] !== undefined && data[1] !== undefined) {
+        if (
+          !Number.isNaN(data[0]) &&
+          !Number.isNaN(data[1]) &&
+          data[0] &&
+          data[1]
+        ) {
           exportForm.movie_filter[`${key}_IN`] = data;
-        } else if (data[0] !== undefined) {
+        } else if (!Number.isNaN(data[0]) && data[0]) {
           exportForm.movie_filter[`${key}_GTE`] = data[0];
-        } else if (data[1] !== undefined) {
+        } else if (!Number.isNaN(data[1]) && data[1]) {
           exportForm.movie_filter[`${key}_LTE`] = data[1];
         }
       }
