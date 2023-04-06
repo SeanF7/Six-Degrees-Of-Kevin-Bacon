@@ -3,6 +3,7 @@ import asyncio
 import json as js
 import time
 import math
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
