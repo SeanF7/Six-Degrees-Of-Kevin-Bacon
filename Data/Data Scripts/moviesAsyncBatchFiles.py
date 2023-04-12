@@ -3,6 +3,7 @@ import asyncio
 import json as js
 import time
 import math
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -11,13 +12,13 @@ start_time = time.time()
 
 
 async def fetch(session, x):
-    async with session.get(f"https://api.themoviedb.org/3/tv/{x}/aggregate_credits?api_key={apiKey}") as response:
+    async with session.get(f"https://api.themoviedb.org/3/movie/{x}?api_key={apiKey}") as response:
         return await response.json()
 
 
 async def main():
-    chunks = 100000
-    request_amount = 219373
+    chunks = 1000
+    request_amount = 1001
     for x in range(1, math.ceil(request_amount/chunks)+1):
         tasks = []
         start = (x-1)*chunks+1
@@ -27,7 +28,7 @@ async def main():
             for y in range(start, end+1):
                 tasks.append(fetch(session, y))
             jsons = await asyncio.gather(*tasks)
-            with open(f"Data/tv-shows/credits/credits_{start}_{end}.jsonl", "w") as out:
+            with open(f"credits_{start}_{end}.jsonl", "w") as out:
                 for json in jsons:
                     if "success" not in json:
                         out.write(f"{js.dumps(json)}\n")

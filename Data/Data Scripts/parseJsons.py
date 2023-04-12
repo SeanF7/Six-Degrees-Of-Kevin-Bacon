@@ -161,4 +161,4 @@ def create_headers():
     csvWrite.writerow(["tv_id:ID(TvShow-ID)", "name", "poster_path", ":LABEL"])
 
 
-create_headers()
+get_tv_episodes_csv()
