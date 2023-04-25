@@ -3,14 +3,14 @@ import asyncio
 import json as js
 import time
 import pandas as pd
-import math
 import os
-import numpy as np
+from tqdm import tqdm
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
 apiKey = os.getenv('API_KEY')
-chunks = 10000
+chunks = 100000
 start_time = time.time()
 movie_url = "https://api.themoviedb.org/3/movie/{id}?api_key={apiKey}"
 latest_movie_url = "https://api.themoviedb.org/3/movie/latest?api_key={apiKey}"
@@ -47,6 +47,9 @@ async def getMovieRelationships():
                 df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
                 tasks = []
 
+    jsons = await asyncio.gather(*tasks)
+    df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
+
     # # Filters out failed requests
     if 'success' in df.columns:
         df = df[df.success != False]
@@ -54,32 +57,38 @@ async def getMovieRelationships():
 
     df['id'] = df['id'].astype(dtype='int64')
 
-    normalizeGroup(df, "movie_crew", "CREW_FOR")
-    normalizeGroup(df, "movie_cast", "CAST_FOR")
+    normalizeGroup(df, "crew", "CREW_FOR", "movie_id").to_csv(
+        'movie_crew.csv', index=False)
+    normalizeGroup(df, "cast", "CAST_FOR", "movie_id").to_csv(
+        'movie_cast.csv', index=False)
 
 
 async def getTVEpisodes():
     tv_df = pd.read_csv("tv_shows.csv")
+    # tv_df['seasons'] = tv_df['seasons'].replace(
+    #     "None", "null").replace("'", '"')
     async with aiohttp.ClientSession() as session:
         df = pd.DataFrame()
         tasks = []
-        for index, row in tv_df.iterrows():
+        for index, row in tqdm(tv_df.iterrows(), total=len(tv_df)):
             tv_show_id = row['id']
-
-            fixed = js.loads(row['seasons'].replace(
-                "'", '"').replace("None", "null"))
+            print(f"Fetching seasons for {tv_show_id}\n")
+            # Write to file
+            string = re.sub(r"^'|(?<=[^a-zA-Z])'|'(?=[^a-zA-Z])|'$", '"',
+                            row['seasons'].replace("\"", "'")).replace("None", "null")
+            fixed = js.loads(string)
             for season in fixed:
                 episode_count = season['episode_count']
                 season_number = season['season_number']
                 for x in range(1, episode_count+1):
-                    tasks.append(
-                        fetchTVEpisode(session=session, url=tv_episode_url, season=season_number, episode=x, tv_id=tv_show_id))
+                    tasks.append(fetchTVEpisode(session=session, url=tv_episode_url,
+                                 season=season_number, episode=x, tv_id=tv_show_id))
             if len(tasks) >= chunks:
                 jsons = await asyncio.gather(*tasks)
-                df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
+                df = pd.concat([df, pd.read_json(jsons)], ignore_index=True)
                 tasks = []
         jsons = await asyncio.gather(*tasks)
-        df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
+        df = pd.concat([df, pd.read_json(jsons)], ignore_index=True)
 
         # Filters " and ' from strings so we don't get errors on import
         df = df.applymap(lambda x: x.replace('"', '').replace(
@@ -100,9 +109,9 @@ async def getTVRelationships():
     async with aiohttp.ClientSession() as session:
         df = pd.DataFrame()
         tasks = []
-        for index, row in tv_df.iterrows():
-            tasks.append(fetch(session, row['id'], tv_episode_credits_url))
-
+        for index, row in tqdm(tv_df.iterrows(), total=len(tv_df)):
+            tasks.append(fetchTVEpisode(session=session, url=tv_episode_credits_url,
+                                        season=row['season_number'], episode=row['episode_number'], tv_id=row['tv_id']))
             if len(tasks) >= chunks:
                 jsons = await asyncio.gather(*tasks)
                 df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
@@ -110,39 +119,39 @@ async def getTVRelationships():
 
         jsons = await asyncio.gather(*tasks)
         df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
-        print(df)
-
-        # # Filters " and ' from strings so we don't get errors on import
-        # df = df.applymap(lambda x: x.replace('"', '').replace(
-        #     "'", '') if isinstance(x, str) else x)
-
         # # Filters out failed requests
-        # if 'success' in df.columns:
-        #     df = df[df.success != False]
-        #     df = df.drop(columns=['success', 'status_code', 'status_message'])
+        if 'success' in df.columns:
+            df = df[df.success != False]
+            df = df.drop(columns=['success', 'status_code', 'status_message'])
 
-        # if "id" in df.columns:
-        #     df['id'] = df['id'].astype(dtype='int64')
-        # df.to_csv('tv_cast.csv', index=False)
+        df['id'] = df['id'].astype(dtype='int64')
+
+        normalizeGroup(df, "crew",  "CREW_FOR", "tv_episode_id").to_csv(
+            'tv_crew.csv', index=False)
+        pd.concat([normalizeGroup(df, "cast",  "CAST_FOR", "tv_episode_id"), normalizeGroup(df, "guest_stars",
+                   "CAST_FOR", "tv_episode_id")], ignore_index=True).to_csv('tv_cast.csv', index=False)
 
 
-async def getNodes():
+async def getAllCSVS():
     # Gets the movies
     # await getData(movie_url, latest_movie_url, "movies.csv")
-    # # Gets the people
+    # Gets the people
     # await getData(person_url, latest_person_url, "people.csv")
     # Gets TV shows
-    # await getData(tv_url, latest_tv_url, "tv_shows.csv")
+    await getData(tv_url, latest_tv_url, "tv_shows_test.csv")
     # Gets TV Episodes
-    await getTVEpisodes()
+    # await getTVEpisodes()
+    # # Gets the movie relationships
+    # await getMovieRelationships()
+    # # Gets the TV relationships
+    # await getTVRelationships()
 
 
-def normalizeGroup(df, file_name, type):
-
-    exploded = df.explode('cast').reset_index(drop=True)
-    normalized_df = pd.json_normalize(exploded['cast'])
-    normalized_df.insert(0, 'movie_id', exploded['id'])
-    normalized_df.insert(len(normalized_df.columns), ':TYPE', type)
+def normalizeGroup(df, person_type, connection_type, id_type):
+    exploded = df.explode(person_type).reset_index(drop=True)
+    normalized_df = pd.json_normalize(exploded[person_type])
+    normalized_df.insert(0, id_type, exploded['id'])
+    normalized_df.insert(len(normalized_df.columns), ':TYPE', connection_type)
 
     if "adult" in normalized_df.columns:
         # Makes adult lowercase as import requires it
@@ -150,19 +159,21 @@ def normalizeGroup(df, file_name, type):
         normalized_df['adult'] = normalized_df['adult'].str.lower()
 
     # Filters " and ' from strings so we don't get errors on import
-    normalized_df = normalized_df.applymap(lambda x: x.replace('"', '').replace(
+    normalized_df.applymap(lambda x: x.replace('"', '').replace(
         "'", '') if isinstance(x, str) else x)
 
-    normalized_df.to_csv(file_name, index=False)
+    # Has to be done later to not screw up movie/tv id but we don't want to keep blank rows
+    normalized_df.dropna(subset=['id'], inplace=True)
+    return normalized_df
 
 
 async def getData(url, latest_url, output_file):
     df = pd.DataFrame()
     tasks = []
     async with aiohttp.ClientSession() as session:
-        # latest = (await fetch(session, 0, latest_url)).get('id')
-        latest = 10
-        for y in range(1, latest+1):
+        latest = (await fetch(session, 0, latest_url)).get('id')
+        latest = 3
+        for y in tqdm(range(1, latest+1)):
             tasks.append(fetch(session, y, url))
             if len(tasks) >= chunks:
                 jsons = await asyncio.gather(*tasks)
@@ -170,6 +181,7 @@ async def getData(url, latest_url, output_file):
                 tasks = []
         jsons = await asyncio.gather(*tasks)
         df = pd.concat([df, pd.DataFrame(jsons)], ignore_index=True)
+
     if url == person_url:
         # Fixes dates
         df['birthday'] = pd.to_datetime(
@@ -203,6 +215,8 @@ async def getData(url, latest_url, output_file):
 
     if "id" in df.columns:
         df['id'] = df['id'].astype(dtype='int64')
+    # Maybe store tv_id season and episode number in a separate file for later use in tv relationships
+    df['seasons'].to_json('seasons.json')
     df.to_csv(output_file, index=False)
 
 
@@ -214,6 +228,5 @@ def filterJson(x, key):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop_policy().get_event_loop()
-    # loop.run_until_complete(getData(movie_url, 10, "test.csv", chunks=10))
-    loop.run_until_complete(getTVRelationships())
+    loop.run_until_complete(getAllCSVS())
     print("--- %s seconds ---" % (time.time() - start_time))
