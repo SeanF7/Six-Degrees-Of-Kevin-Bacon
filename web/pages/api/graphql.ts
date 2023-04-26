@@ -224,7 +224,6 @@ const resolvers = {
   Query: {
     find_path(_parent: any, _args: PathArgs, _context: any, _resolveInfo: any) {
       let query = build_query(_args, false);
-      console.log(query);
       return driver.executeQuery(query).then((res) => {
         return parse_results(res.records[0]);
       });
