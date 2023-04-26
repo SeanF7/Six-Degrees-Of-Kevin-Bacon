@@ -139,7 +139,8 @@ function SearchPaths() {
               Search
             </button>
           </div>
-          <SearchSettings setFilters={setFilters} />
+          {/* Removed as a good design did not come to mind
+          <SearchSettings setFilters={setFilters} /> */}
         </form>
         {loading ? (
           <div className="flex items-center justify-center pt-20">
