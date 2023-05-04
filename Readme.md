@@ -1,17 +1,12 @@
-# WIP 
+# Six Degrees Of Kevin Bacon
+## What is it?
+This project is for a website that will show the path between 2 people using movies and tv shows that they have in common.
+
+![GIF of the website working](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzA1NWU2M2Q1ZmViYTdmNTlmM2VkOGRlNGEyZmQzMDc5ZGIxNjA2YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/0DwO4LW3um0tirIQRP/giphy.gif)
 ## Neo4j
+This project uses Neo4j as it's database. In total the database works out to 7 million nodes with 33 million connections. The commands for loading and setting up the database can be found below.
 ### Commands
-Load Data Command 
-This command still needs work as all of the arrays are imported as strings as the default to list commands seem to break it.
-The files also require manual tweaking as things like dates aren't consistent 
-Changing to admin import using this command
-Issues in file is " can cause issues and some deathdates are inputted wrong.
-There is still issues with this command should find out how to remove --ignore-extra-columns=true --skip-duplicate-nodes --skip-bad-relationships
-ID is Type string but should probably be int. Causes passing of variables to be a bit weird but not a huge issue
-
-Adult is not working as it should be false and true but instead it is False and True. All that really matters is the true one though.
-Lots of cleanup in regards to the graphql typings on filtering for better completion is still needed.
-
+Load Data Command
 dbms.cypher.forbid_exhaustive_shortestpath = true in neo4j config
 
 ```
@@ -36,6 +31,7 @@ CREATE CONSTRAINT episode_id FOR (t:TvEpisode) REQUIRE t.episode_id IS UNIQUE;
 CREATE CONSTRAINT show_index FOR (tv:TvShow) REQUIRE (tv.tv_id) IS UNIQUE;
 ```
 
+### Queries 
 Finds path and returns tv shows connected with it
 MATCH (p1:Person {person_id: "429"}), (p2:Person {person_id: "1566455"}), p = shortestPath((p1)-[*]-(p2))
 WITH NODES(p) AS nodes
