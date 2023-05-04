@@ -6,13 +6,15 @@ This project is for a website that will show the path between 2 people using mov
 ## Neo4j
 This project uses Neo4j as it's database. In total the database works out to 7 million nodes with 33 million connections. The commands for loading and setting up the database can be found below.
 ### Commands
-Load Data Command
+#### Config file
 dbms.cypher.forbid_exhaustive_shortestpath = true in neo4j config
 
+#### Loading Data
 ```
 neo4j-admin database import full --nodes=import/movies_header.csv,import/movies.csv --nodes=import/tv_episodes_header.csv,import/tv_episodes.csv --nodes=import/tv_shows_header.csv,import/tv_shows.csv --nodes=import/people_header.csv,import/people.csv --relationships=import/crew_movies_header.csv,import/crew_movies.csv --relationships=import/cast_movies_header.csv,import/cast_movies.csv --relationships=import/tv_cast_header.csv,import/tv_cast.csv --relationships=import/tv_crew_header.csv,import/tv_crew.csv --overwrite-destination --ignore-extra-columns=true --skip-duplicate-nodes --skip-bad-relationships --id-type=integer
 ```
 
+#### Cypher Commands
 Add property so lowercase name searches are faster
 ```
 CALL apoc.periodic.iterate(
@@ -31,7 +33,7 @@ CREATE CONSTRAINT episode_id FOR (t:TvEpisode) REQUIRE t.episode_id IS UNIQUE;
 CREATE CONSTRAINT show_index FOR (tv:TvShow) REQUIRE (tv.tv_id) IS UNIQUE;
 ```
 
-### Queries 
+### Queries
 Finds path and returns tv shows connected with it
 MATCH (p1:Person {person_id: "429"}), (p2:Person {person_id: "1566455"}), p = shortestPath((p1)-[*]-(p2))
 WITH NODES(p) AS nodes
