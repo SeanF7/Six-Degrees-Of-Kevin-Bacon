@@ -8,7 +8,7 @@ This project is for a website that will show the path between 2 people using mov
 
 ## Neo4j
 
-This project uses Neo4j as it's database. In total the database works out to 7 million nodes with 33 million connections. The commands for loading and setting up the database can be found below.
+This project uses Neo4j as it's database. In total the database works out to 7 million nodes with 33 million connections. The commands for loading and setting up the database can be found below. APOC Must be installed in the database for the queries to work.
 
 ### Commands
 
