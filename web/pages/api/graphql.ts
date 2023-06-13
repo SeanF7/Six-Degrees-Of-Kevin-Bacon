@@ -208,9 +208,9 @@ const typeDefs = gql`
         MATCH (p:Person)
         WHERE p.lowercase_name CONTAINS toLower($name)
         RETURN p
-        ORDER BY p.popularity DESC
         LIMIT 5
         """
+        # Removed ORDER BY p.popularity DESC in order to increase speed
       )
   }
 `;
